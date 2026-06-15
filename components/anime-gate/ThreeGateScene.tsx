@@ -5,6 +5,7 @@ import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "re
 import type { MutableRefObject, RefObject } from "react";
 import * as THREE from "three";
 import {
+  type CameraPreset,
   enterWorldMotion,
   openingMotion,
   startLearningDance,
@@ -26,7 +27,12 @@ type SceneRefs = {
   lookAt: THREE.Vector3;
   dancer: BlockyDancerHandle | null;
   world: GeneratedWorldHandle | null;
+  cameraPreset: CameraPreset;
 };
+
+function applyVector3(target: THREE.Vector3, value: readonly [number, number, number]) {
+  target.set(value[0], value[1], value[2]);
+}
 
 function hasWebGL() {
   if (typeof window === "undefined") {
@@ -44,22 +50,41 @@ function hasWebGL() {
   }
 }
 
-function SceneContent({ sceneRefs }: { sceneRefs: MutableRefObject<SceneRefs> }) {
+function useDesktopLayout() {
+  const [isDesktop, setIsDesktop] = useState(false);
+
+  useEffect(() => {
+    const query = window.matchMedia("(min-width: 768px)");
+    const update = () => setIsDesktop(query.matches);
+    update();
+    query.addEventListener("change", update);
+    return () => query.removeEventListener("change", update);
+  }, []);
+
+  return isDesktop;
+}
+
+function SceneContent({ isDesktop, sceneRefs }: { isDesktop: boolean; sceneRefs: MutableRefObject<SceneRefs> }) {
   const dancerRef = useRef<BlockyDancerHandle | null>(null);
   const worldRef = useRef<GeneratedWorldHandle | null>(null);
+  const sceneGroupRef = useRef<THREE.Group>(null);
   const openingPlayedRef = useRef(false);
   const { camera } = useThree();
+  const cameraPreset = isDesktop ? sceneConfig.camera.desktop : sceneConfig.camera.mobile;
+  const layoutPreset = isDesktop ? sceneConfig.layout.desktop : sceneConfig.layout.mobile;
 
   useEffect(() => {
     const perspectiveCamera = camera as THREE.PerspectiveCamera;
-    perspectiveCamera.position.set(...sceneConfig.camera.initialPosition);
+    applyVector3(perspectiveCamera.position, cameraPreset.initialPosition);
     perspectiveCamera.lookAt(sceneRefs.current.lookAt);
     sceneRefs.current.camera = perspectiveCamera;
-  }, [camera, sceneRefs]);
+    sceneRefs.current.cameraPreset = cameraPreset;
+  }, [camera, cameraPreset, sceneRefs]);
 
   useEffect(() => {
     sceneRefs.current.dancer = dancerRef.current;
     sceneRefs.current.world = worldRef.current;
+    sceneRefs.current.cameraPreset = cameraPreset;
 
     if (!openingPlayedRef.current && sceneRefs.current.camera && dancerRef.current && worldRef.current) {
       openingPlayedRef.current = true;
@@ -67,10 +92,22 @@ function SceneContent({ sceneRefs }: { sceneRefs: MutableRefObject<SceneRefs> })
         camera: sceneRefs.current.camera,
         cameraLookAt: sceneRefs.current.lookAt,
         dancer: dancerRef.current,
-        world: worldRef.current
+        world: worldRef.current,
+        cameraPreset
       });
     }
-  });
+  }, [cameraPreset, sceneRefs]);
+
+  useEffect(() => {
+    const cameraObject = sceneRefs.current.camera;
+    if (!cameraObject || !openingPlayedRef.current) {
+      applyVector3(sceneRefs.current.lookAt, cameraPreset.lookAt);
+      return;
+    }
+
+    applyVector3(cameraObject.position, cameraPreset.initialPosition);
+    applyVector3(sceneRefs.current.lookAt, cameraPreset.lookAt);
+  }, [cameraPreset, sceneRefs]);
 
   useFrame(() => {
     if (sceneRefs.current.camera) {
@@ -85,8 +122,10 @@ function SceneContent({ sceneRefs }: { sceneRefs: MutableRefObject<SceneRefs> })
       <ambientLight intensity={0.42} color="#9ba8ff" />
       <hemisphereLight args={["#5f7dff", "#1b0710", 0.86]} />
       <directionalLight position={[2, 5, 4]} intensity={0.9} color="#fff3d2" />
-      <GeneratedWorld ref={worldRef} />
-      <BlockyDancer ref={dancerRef} position={[0, -0.04, 0.42]} scale={1.04} />
+      <group ref={sceneGroupRef} position={layoutPreset.scenePosition} scale={layoutPreset.sceneScale}>
+        <GeneratedWorld ref={worldRef} />
+        <BlockyDancer ref={dancerRef} position={layoutPreset.dancerPosition} scale={layoutPreset.dancerScale} />
+      </group>
     </>
   );
 }
@@ -94,11 +133,17 @@ function SceneContent({ sceneRefs }: { sceneRefs: MutableRefObject<SceneRefs> })
 export const ThreeGateScene = forwardRef<ThreeGateSceneHandle, { transitionOverlayRef: RefObject<HTMLDivElement | null> }>(
   function ThreeGateScene({ transitionOverlayRef }, ref) {
     const [webglSupported, setWebglSupported] = useState<boolean | null>(null);
+    const isDesktop = useDesktopLayout();
     const sceneRefs = useRef<SceneRefs>({
       camera: null,
-      lookAt: new THREE.Vector3(...sceneConfig.camera.lookAt),
+      lookAt: new THREE.Vector3(
+        sceneConfig.camera.mobile.lookAt[0],
+        sceneConfig.camera.mobile.lookAt[1],
+        sceneConfig.camera.mobile.lookAt[2]
+      ),
       dancer: null,
-      world: null
+      world: null,
+      cameraPreset: sceneConfig.camera.mobile
     });
 
     useEffect(() => {
@@ -118,6 +163,7 @@ export const ThreeGateScene = forwardRef<ThreeGateSceneHandle, { transitionOverl
           cameraLookAt: lookAt,
           dancer,
           world,
+          cameraPreset: sceneRefs.current.cameraPreset,
           onComplete
         });
       },
@@ -135,6 +181,7 @@ export const ThreeGateScene = forwardRef<ThreeGateSceneHandle, { transitionOverl
           world,
           reducedMotion,
           transitionOverlay: transitionOverlayRef.current,
+          cameraPreset: sceneRefs.current.cameraPreset,
           onComplete
         });
       },
@@ -151,6 +198,7 @@ export const ThreeGateScene = forwardRef<ThreeGateSceneHandle, { transitionOverl
           world,
           reducedMotion,
           transitionOverlay: transitionOverlayRef.current,
+          cameraPreset: sceneRefs.current.cameraPreset,
           onComplete
         });
       }
@@ -171,14 +219,14 @@ export const ThreeGateScene = forwardRef<ThreeGateSceneHandle, { transitionOverl
           <Canvas
             className={styles.threeCanvas}
             dpr={[1, sceneConfig.performance.maxDpr]}
-            camera={{ position: sceneConfig.camera.initialPosition, fov: 42, near: 0.1, far: 40 }}
+            camera={{ position: sceneConfig.camera.mobile.initialPosition, fov: isDesktop ? 40 : 42, near: 0.1, far: 40 }}
             gl={{
               alpha: false,
               antialias: true,
               powerPreference: "high-performance"
             }}
           >
-            <SceneContent sceneRefs={sceneRefs} />
+            <SceneContent isDesktop={isDesktop} sceneRefs={sceneRefs} />
           </Canvas>
         )}
       </div>

@@ -26,12 +26,21 @@ export type WorldRig = {
   portalLight: THREE.PointLight | null;
 };
 
+export type CameraPreset = {
+  initialPosition: readonly [number, number, number];
+  enteredPosition: readonly [number, number, number];
+  worldMapPosition: readonly [number, number, number];
+  lookAt: readonly [number, number, number];
+  enteredLookAt: readonly [number, number, number];
+};
+
 type MotionTargets = {
   camera: THREE.PerspectiveCamera;
   cameraLookAt: THREE.Vector3;
   dancer?: DancerRig | null;
   world?: WorldRig | null;
   transitionOverlay?: HTMLDivElement | null;
+  cameraPreset?: CameraPreset;
 };
 
 type MotionOptions = MotionTargets & {
@@ -41,6 +50,10 @@ type MotionOptions = MotionTargets & {
 
 function vectorTo(target: THREE.Vector3, value: readonly [number, number, number], duration: number, position = 0) {
   return { target, value, duration, position };
+}
+
+function applyVector3(target: THREE.Vector3, value: readonly [number, number, number]) {
+  target.set(value[0], value[1], value[2]);
 }
 
 function flashOverlay(timeline: gsap.core.Timeline, overlay?: HTMLDivElement | null, at = 0) {
@@ -58,11 +71,11 @@ function setDancing(dancer: DancerRig | null | undefined, active: boolean) {
   dancer?.setDancing(active);
 }
 
-export function openingMotion({ camera, cameraLookAt, dancer, world }: MotionTargets) {
+export function openingMotion({ camera, cameraLookAt, dancer, world, cameraPreset = sceneConfig.camera.mobile }: MotionTargets) {
   const timeline = gsap.timeline();
 
-  camera.position.set(...sceneConfig.camera.initialPosition);
-  cameraLookAt.set(...sceneConfig.camera.lookAt);
+  applyVector3(camera.position, cameraPreset.initialPosition);
+  applyVector3(cameraLookAt, cameraPreset.lookAt);
 
   if (world?.root) {
     gsap.set(world.root.scale, { x: 0.92, y: 0.92, z: 0.92 });
@@ -89,7 +102,15 @@ export function openingMotion({ camera, cameraLookAt, dancer, world }: MotionTar
   return timeline;
 }
 
-export function enterWorldMotion({ camera, cameraLookAt, dancer, world, reducedMotion, onComplete }: MotionOptions) {
+export function enterWorldMotion({
+  camera,
+  cameraLookAt,
+  dancer,
+  world,
+  reducedMotion,
+  onComplete,
+  cameraPreset = sceneConfig.camera.mobile
+}: MotionOptions) {
   const timeline = gsap.timeline({
     onComplete
   });
@@ -99,7 +120,7 @@ export function enterWorldMotion({ camera, cameraLookAt, dancer, world, reducedM
     return timeline;
   }
 
-  const cameraMove = vectorTo(camera.position, sceneConfig.camera.enteredPosition, 0.8);
+  const cameraMove = vectorTo(camera.position, cameraPreset.enteredPosition, 0.8);
   timeline.to(cameraMove.target, {
     x: cameraMove.value[0],
     y: cameraMove.value[1],
@@ -107,7 +128,13 @@ export function enterWorldMotion({ camera, cameraLookAt, dancer, world, reducedM
     duration: cameraMove.duration,
     ease: "power3.out"
   }, cameraMove.position);
-  timeline.to(cameraLookAt, { x: 0, y: 1.2, z: 0.12, duration: 0.8, ease: "power3.out" }, 0);
+  timeline.to(cameraLookAt, {
+    x: cameraPreset.enteredLookAt[0],
+    y: cameraPreset.enteredLookAt[1],
+    z: cameraPreset.enteredLookAt[2],
+    duration: 0.8,
+    ease: "power3.out"
+  }, 0);
 
   if (dancer?.root && dancer.rightArm && dancer.leftArm && dancer.head) {
     setDancing(dancer, true);
@@ -221,7 +248,8 @@ export function worldMapPortalMotion({
   world,
   transitionOverlay,
   reducedMotion,
-  onComplete
+  onComplete,
+  cameraPreset = sceneConfig.camera.mobile
 }: MotionOptions) {
   const timeline = gsap.timeline({
     defaults: { ease: "power3.inOut" },
@@ -233,11 +261,10 @@ export function worldMapPortalMotion({
     timeline.to({}, { duration: 0.3 }, 0);
     return timeline;
   }
-
   timeline.to(camera.position, {
-    x: sceneConfig.camera.worldMapPosition[0],
-    y: sceneConfig.camera.worldMapPosition[1],
-    z: sceneConfig.camera.worldMapPosition[2],
+    x: cameraPreset.worldMapPosition[0],
+    y: cameraPreset.worldMapPosition[1],
+    z: cameraPreset.worldMapPosition[2],
     duration: 0.95
   }, 0);
   timeline.to(cameraLookAt, { x: 3.05, y: 1.45, z: -4.4, duration: 0.95 }, 0);

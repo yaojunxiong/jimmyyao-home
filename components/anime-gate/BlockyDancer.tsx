@@ -17,7 +17,7 @@ export type BlockyDancerHandle = {
 };
 
 type BlockyDancerProps = {
-  position?: [number, number, number];
+  position?: readonly [number, number, number];
   scale?: number;
 };
 
