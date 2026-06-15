@@ -23,10 +23,22 @@ export function HtmlOverlayMenu({
 }: HtmlOverlayMenuProps) {
   return (
     <section className={`${styles.uiLayer} pointer-events-none fixed inset-0 z-20 flex min-h-[100dvh] w-full flex-col items-center px-5 text-center`}>
+      <div className={styles.learningGlyphs} aria-hidden="true">
+        <span>あ</span>
+        <span>AI</span>
+        <span>にほんご</span>
+        <span>50 LESSONS</span>
+        <span>え</span>
+      </div>
       <div className={styles.openingPanel} data-entered={hasEntered ? "true" : "false"}>
         <div className={styles.topMark}>
           <span className={styles.crest} aria-hidden="true" />
           <span>JIMMY YAO</span>
+        </div>
+
+        <div className={styles.systemPrompt} data-entered={hasEntered ? "true" : "false"} aria-hidden="true">
+          <span>SYSTEM READY</span>
+          <span>AI Learning World Online</span>
         </div>
 
         <h1 className={styles.posterTitle} aria-label="AI Learning World">
@@ -72,7 +84,7 @@ export function HtmlOverlayMenu({
                 disabled={isTransitioning}
                 onClick={onWorldMap}
                 data-menu-button
-                className={`${styles.menuButton} disabled:cursor-wait disabled:opacity-70`}
+                className={`${styles.menuButton} ${styles.menuButtonMap} disabled:cursor-wait disabled:opacity-70`}
               >
                 <span className={styles.menuIcon} aria-hidden="true">◇</span>
                 <span className={styles.menuCopy}>
@@ -82,7 +94,7 @@ export function HtmlOverlayMenu({
                 <span className={styles.menuArrow} aria-hidden="true">›</span>
               </button>
 
-              <a href={contactHref} onClick={onContact} data-menu-button className={styles.menuButton}>
+              <a href={contactHref} onClick={onContact} data-menu-button className={`${styles.menuButton} ${styles.menuButtonContact}`}>
                 <span className={styles.menuIcon} aria-hidden="true">@</span>
                 <span className={styles.menuCopy}>
                   <span className={styles.menuTitle}>CONTACT</span>

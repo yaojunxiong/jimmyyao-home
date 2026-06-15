@@ -41,7 +41,8 @@ export const sceneConfig = {
     warmWhite: "#fff3d2"
   },
   particles: {
-    count: 220,
+    count: 160,
+    cubeCount: 72,
     spread: 9,
     height: 5.35
   },

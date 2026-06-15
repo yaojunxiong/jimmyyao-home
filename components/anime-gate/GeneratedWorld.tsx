@@ -8,10 +8,12 @@ import { sceneConfig } from "@/lib/sceneConfig";
 export type GeneratedWorldHandle = {
   root: THREE.Group | null;
   stage: THREE.Group | null;
+  stagePulse: THREE.Group | null;
   portal: THREE.Group | null;
   worldMapPortal: THREE.Group | null;
   moon: THREE.Group | null;
   particles: THREE.Points | null;
+  cubeParticles: THREE.InstancedMesh | null;
   slash: THREE.Group | null;
   stageLight: THREE.PointLight | null;
   portalLight: THREE.PointLight | null;
@@ -30,6 +32,14 @@ type Building = {
   scale: [number, number, number];
   color: string;
   light: [number, number, number];
+  accent: string;
+};
+
+type FloatingIsland = {
+  key: string;
+  position: [number, number, number];
+  scale: [number, number, number];
+  accent: string;
 };
 
 function LowPolyCloud({ position, scale = 1 }: { position: [number, number, number]; scale?: number }) {
@@ -74,6 +84,10 @@ function PortalRing({
         <boxGeometry args={[1, 1, 1]} />
         <meshBasicMaterial color={accent} transparent opacity={0.75} />
       </mesh>
+      <mesh rotation={[Math.PI / 2, 0, 0]} scale={1.22}>
+        <torusGeometry args={[1.05, 0.012, 8, 42]} />
+        <meshBasicMaterial color={accent} transparent opacity={0.34} />
+      </mesh>
     </group>
   );
 }
@@ -81,10 +95,12 @@ function PortalRing({
 export const GeneratedWorld = forwardRef<GeneratedWorldHandle>(function GeneratedWorld(_props, ref) {
   const rootRef = useRef<THREE.Group>(null);
   const stageRef = useRef<THREE.Group>(null);
+  const stagePulseRef = useRef<THREE.Group>(null);
   const portalRef = useRef<THREE.Group>(null);
   const worldMapPortalRef = useRef<THREE.Group>(null);
   const moonRef = useRef<THREE.Group>(null);
   const particlesRef = useRef<THREE.Points>(null);
+  const cubeParticlesRef = useRef<THREE.InstancedMesh>(null);
   const slashRef = useRef<THREE.Group>(null);
   const haloRef = useRef<THREE.Group>(null);
   const symbolsRef = useRef<THREE.Group>(null);
@@ -118,8 +134,9 @@ export const GeneratedWorld = forwardRef<GeneratedWorldHandle>(function Generate
         key: `building-${index}`,
         position: [side * (3.35 + (index % 5) * 0.24), height * 0.5 - 0.05, -3.1 - lane * 0.48],
         scale: [0.36 + (index % 3) * 0.09, height, 0.36],
-        color: index % 3 === 0 ? "#171127" : "#0f0b18",
-        light: [0, height * 0.25, 0.19]
+        color: index % 4 === 0 ? "#171127" : index % 4 === 1 ? "#11172c" : index % 4 === 2 ? "#211026" : "#0f0b18",
+        light: [0, height * 0.25, 0.19],
+        accent: index % 4 === 0 ? sceneConfig.colors.cyan : index % 4 === 1 ? sceneConfig.colors.gold : index % 4 === 2 ? sceneConfig.colors.red : sceneConfig.colors.violet
       });
     }
     return result;
@@ -134,12 +151,22 @@ export const GeneratedWorld = forwardRef<GeneratedWorldHandle>(function Generate
         key: `skyline-${index}`,
         position: [x, 1 + height * 0.5, -6.75 - (index % 3) * 0.1],
         scale: [0.18 + (index % 4) * 0.03, height, 0.18],
-        color: index % 3 === 0 ? "#151126" : "#0d0a18",
-        light: [0, 0, 0.09]
+        color: index % 3 === 0 ? "#151126" : index % 3 === 1 ? "#11182b" : "#0d0a18",
+        light: [0, 0, 0.09],
+        accent: index % 5 === 0 ? sceneConfig.colors.cyan : index % 4 === 0 ? sceneConfig.colors.orange : sceneConfig.colors.gold
       });
     }
     return result;
   }, []);
+
+  const floatingIslands = useMemo<FloatingIsland[]>(
+    () => [
+      { key: "island-left", position: [-2.9, 2.32, -4.35], scale: [0.82, 0.16, 0.58], accent: sceneConfig.colors.cyan },
+      { key: "island-right", position: [2.7, 2.68, -4.8], scale: [0.72, 0.14, 0.5], accent: sceneConfig.colors.orange },
+      { key: "island-back", position: [0.8, 3.14, -5.85], scale: [0.58, 0.12, 0.42], accent: sceneConfig.colors.violet }
+    ],
+    []
+  );
 
   const learningSymbols = useMemo(
     () => [
@@ -179,12 +206,41 @@ export const GeneratedWorld = forwardRef<GeneratedWorldHandle>(function Generate
     return geometry;
   }, [particleData.positions]);
 
+  const cubeParticleData = useMemo(() => {
+    const result: Array<{
+      position: [number, number, number];
+      speed: number;
+      phase: number;
+      scale: number;
+      color: string;
+    }> = [];
+
+    for (let index = 0; index < sceneConfig.particles.cubeCount; index += 1) {
+      result.push({
+        position: [
+          (Math.random() - 0.5) * 8.2,
+          0.9 + Math.random() * 4.2,
+          -1.2 - Math.random() * 5.4
+        ],
+        speed: 0.22 + Math.random() * 0.42,
+        phase: Math.random() * Math.PI * 2,
+        scale: 0.035 + Math.random() * 0.035,
+        color: index % 5 === 0 ? sceneConfig.colors.cyan : index % 3 === 0 ? sceneConfig.colors.red : sceneConfig.colors.gold
+      });
+    }
+
+    return result;
+  }, []);
+
   useImperativeHandle(ref, () => ({
     get root() {
       return rootRef.current;
     },
     get stage() {
       return stageRef.current;
+    },
+    get stagePulse() {
+      return stagePulseRef.current;
     },
     get portal() {
       return portalRef.current;
@@ -197,6 +253,9 @@ export const GeneratedWorld = forwardRef<GeneratedWorldHandle>(function Generate
     },
     get particles() {
       return particlesRef.current;
+    },
+    get cubeParticles() {
+      return cubeParticlesRef.current;
     },
     get slash() {
       return slashRef.current;
@@ -222,6 +281,17 @@ export const GeneratedWorld = forwardRef<GeneratedWorldHandle>(function Generate
       stageRef.current.rotation.y += 0.003;
     }
 
+    if (stagePulseRef.current) {
+      stagePulseRef.current.children.forEach((child, index) => {
+        const pulse = (Math.sin(time * (1.35 + index * 0.22) + index * 1.2) + 1) * 0.5;
+        child.scale.setScalar(0.88 + pulse * 0.5 + index * 0.12);
+        const material = "material" in child ? child.material : null;
+        if (material instanceof THREE.MeshBasicMaterial) {
+          material.opacity = 0.28 - pulse * 0.16;
+        }
+      });
+    }
+
     if (portalRef.current) {
       portalRef.current.rotation.z += 0.01;
       portalRef.current.position.y = 1.58 + Math.sin(time * 1.8) * 0.045;
@@ -229,6 +299,7 @@ export const GeneratedWorld = forwardRef<GeneratedWorldHandle>(function Generate
 
     if (worldMapPortalRef.current) {
       worldMapPortalRef.current.rotation.z -= 0.006;
+      worldMapPortalRef.current.position.y = 1.45 + Math.sin(time * 1.2) * 0.035;
     }
 
     if (haloRef.current) {
@@ -260,6 +331,27 @@ export const GeneratedWorld = forwardRef<GeneratedWorldHandle>(function Generate
       }
       attribute.needsUpdate = true;
     }
+
+    if (cubeParticlesRef.current) {
+      const matrix = new THREE.Matrix4();
+      const color = new THREE.Color();
+      cubeParticleData.forEach((particle, index) => {
+        const y = particle.position[1] + Math.sin(time * particle.speed + particle.phase) * 0.18;
+        const x = particle.position[0] + Math.sin(time * 0.45 + particle.phase) * 0.12;
+        const z = particle.position[2] + Math.cos(time * 0.35 + particle.phase) * 0.1;
+        matrix.compose(
+          new THREE.Vector3(x, y, z),
+          new THREE.Quaternion().setFromEuler(new THREE.Euler(time * 0.24 + particle.phase, time * 0.18, 0)),
+          new THREE.Vector3(particle.scale, particle.scale, particle.scale)
+        );
+        cubeParticlesRef.current?.setMatrixAt(index, matrix);
+        cubeParticlesRef.current?.setColorAt(index, color.set(particle.color));
+      });
+      cubeParticlesRef.current.instanceMatrix.needsUpdate = true;
+      if (cubeParticlesRef.current.instanceColor) {
+        cubeParticlesRef.current.instanceColor.needsUpdate = true;
+      }
+    }
   });
 
   return (
@@ -286,6 +378,24 @@ export const GeneratedWorld = forwardRef<GeneratedWorldHandle>(function Generate
           <ringGeometry args={[0.36, 0.48, 10]} />
           <meshBasicMaterial color="#ff9b38" transparent opacity={0.55} />
         </mesh>
+        <mesh position={[0, 0.22, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+          <torusGeometry args={[1.78, 0.025, 8, 44]} />
+          <meshBasicMaterial color={sceneConfig.colors.cyan} transparent opacity={0.52} />
+        </mesh>
+        <mesh position={[0, 0.24, 0]} rotation={[-Math.PI / 2, 0, Math.PI / 4]}>
+          <torusGeometry args={[1.98, 0.016, 8, 44]} />
+          <meshBasicMaterial color={sceneConfig.colors.red} transparent opacity={0.38} />
+        </mesh>
+        <group ref={stagePulseRef} position={[0, 0.27, 0]}>
+          <mesh rotation={[-Math.PI / 2, 0, 0]}>
+            <ringGeometry args={[1.12, 1.16, 36]} />
+            <meshBasicMaterial color={sceneConfig.colors.cyan} transparent opacity={0.24} />
+          </mesh>
+          <mesh rotation={[-Math.PI / 2, 0, 0]}>
+            <ringGeometry args={[0.58, 0.62, 32]} />
+            <meshBasicMaterial color={sceneConfig.colors.orange} transparent opacity={0.2} />
+          </mesh>
+        </group>
       </group>
 
       <pointLight ref={stageLightRef} position={[0, 2.35, 1.1]} color={sceneConfig.colors.cyan} intensity={1.5} distance={7} />
@@ -339,7 +449,11 @@ export const GeneratedWorld = forwardRef<GeneratedWorldHandle>(function Generate
             </mesh>
             <mesh position={[building.position[0], building.light[1], building.position[2] + building.light[2]]} scale={[0.08, 0.06, 0.02]}>
               <boxGeometry args={[1, 1, 1]} />
-              <meshBasicMaterial color={building.key.endsWith("3") ? sceneConfig.colors.cyan : sceneConfig.colors.gold} transparent opacity={0.8} />
+              <meshBasicMaterial color={building.accent} transparent opacity={0.82} />
+            </mesh>
+            <mesh position={[building.position[0] + building.scale[0] * 0.22, building.light[1] + 0.22, building.position[2] + building.light[2]]} scale={[0.055, 0.045, 0.018]}>
+              <boxGeometry args={[1, 1, 1]} />
+              <meshBasicMaterial color={building.accent} transparent opacity={0.45} />
             </mesh>
           </group>
         ))}
@@ -354,7 +468,26 @@ export const GeneratedWorld = forwardRef<GeneratedWorldHandle>(function Generate
             </mesh>
             <mesh position={[building.position[0], building.position[1] + building.scale[1] * 0.16, building.position[2] + building.light[2]]} scale={[0.035, 0.035, 0.012]}>
               <boxGeometry args={[1, 1, 1]} />
-              <meshBasicMaterial color={building.key.endsWith("4") ? sceneConfig.colors.cyan : sceneConfig.colors.gold} transparent opacity={0.58} />
+              <meshBasicMaterial color={building.accent} transparent opacity={0.58} />
+            </mesh>
+          </group>
+        ))}
+      </group>
+
+      <group>
+        {floatingIslands.map((island, index) => (
+          <group key={island.key} position={island.position}>
+            <mesh scale={island.scale} rotation={[0, index * 0.24, 0]}>
+              <boxGeometry args={[1, 1, 1]} />
+              <meshStandardMaterial color="#151225" emissive={island.accent} emissiveIntensity={0.12} roughness={0.72} />
+            </mesh>
+            <mesh position={[0, 0.26, 0]} scale={[0.11, 0.52 + index * 0.08, 0.11]}>
+              <boxGeometry args={[1, 1, 1]} />
+              <meshBasicMaterial color={island.accent} transparent opacity={0.56} />
+            </mesh>
+            <mesh position={[0, 0.58 + index * 0.04, 0]} rotation={[Math.PI / 2, 0, 0]}>
+              <torusGeometry args={[0.24 + index * 0.035, 0.01, 6, 24]} />
+              <meshBasicMaterial color={island.accent} transparent opacity={0.54} />
             </mesh>
           </group>
         ))}
@@ -452,6 +585,10 @@ export const GeneratedWorld = forwardRef<GeneratedWorldHandle>(function Generate
 
       <group ref={portalRef} position={[0, 1.58, -2.55]} scale={[0.88, 0.88, 0.88]}>
         <PortalRing accent={sceneConfig.colors.orange} position={[0, 0, 0]} name="start" />
+        <mesh rotation={[Math.PI / 2, 0, 0]} scale={1.38}>
+          <torusGeometry args={[1.05, 0.018, 8, 48]} />
+          <meshBasicMaterial color={sceneConfig.colors.cyan} transparent opacity={0.24} />
+        </mesh>
       </group>
 
       <group ref={worldMapPortalRef} position={[3.1, 1.45, -4.65]} scale={[0.78, 0.78, 0.78]}>
@@ -461,6 +598,11 @@ export const GeneratedWorld = forwardRef<GeneratedWorldHandle>(function Generate
       <points ref={particlesRef} geometry={particleGeometry}>
         <pointsMaterial color={sceneConfig.colors.gold} size={0.035} sizeAttenuation transparent opacity={0.78} />
       </points>
+
+      <instancedMesh ref={cubeParticlesRef} args={[undefined, undefined, sceneConfig.particles.cubeCount]}>
+        <boxGeometry args={[1, 1, 1]} />
+        <meshBasicMaterial color={sceneConfig.colors.gold} transparent opacity={0.72} />
+      </instancedMesh>
 
       <group ref={slashRef} visible={false} position={[0, 1.86, 0.28]} rotation={[0, 0, -0.35]}>
         <mesh scale={[2.8, 0.035, 0.035]}>

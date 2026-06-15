@@ -65,6 +65,61 @@
   padding-bottom: env(safe-area-inset-bottom);
 }
 
+.learningGlyphs {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.learningGlyphs span {
+  position: absolute;
+  display: block;
+  color: rgba(255, 243, 210, 0.58);
+  font-size: clamp(0.72rem, 2.8vw, 1rem);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-shadow:
+    0 0 12px rgba(66, 242, 255, 0.4),
+    0 0 18px rgba(255, 55, 82, 0.18);
+  opacity: 0.6;
+  animation: glyphFloat 8s ease-in-out infinite;
+}
+
+.learningGlyphs span:nth-child(1) {
+  top: 22%;
+  left: 12%;
+  color: rgba(66, 242, 255, 0.62);
+}
+
+.learningGlyphs span:nth-child(2) {
+  top: 30%;
+  right: 10%;
+  animation-delay: -1.4s;
+}
+
+.learningGlyphs span:nth-child(3) {
+  top: 52%;
+  left: 7%;
+  color: rgba(255, 211, 122, 0.56);
+  animation-delay: -2.6s;
+}
+
+.learningGlyphs span:nth-child(4) {
+  top: 47%;
+  right: 5%;
+  font-size: clamp(0.62rem, 2.5vw, 0.86rem);
+  animation-delay: -4.2s;
+}
+
+.learningGlyphs span:nth-child(5) {
+  top: 64%;
+  right: 16%;
+  color: rgba(255, 155, 56, 0.54);
+  animation-delay: -5.4s;
+}
+
 .gateRoot::before {
   position: absolute;
   inset: 0;
@@ -149,6 +204,38 @@
   inset: 13px;
   background: rgba(255, 55, 82, 0.56);
   box-shadow: 0 0 12px rgba(255, 55, 82, 0.68);
+}
+
+.systemPrompt {
+  position: absolute;
+  top: 17.5%;
+  left: 50%;
+  z-index: 6;
+  display: flex;
+  width: min(calc(100vw - 48px), 360px);
+  flex-direction: column;
+  gap: 3px;
+  color: rgba(202, 252, 255, 0.74);
+  font-size: clamp(0.68rem, 2.5vw, 0.8rem);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  line-height: 1.15;
+  text-transform: uppercase;
+  text-shadow: 0 0 14px rgba(66, 242, 255, 0.42);
+  transform: translateX(-50%);
+  animation: systemBoot 5.8s ease-in-out infinite;
+}
+
+.systemPrompt span:last-child {
+  color: rgba(255, 211, 122, 0.66);
+  font-size: 0.86em;
+  letter-spacing: 0.04em;
+  text-transform: none;
+}
+
+.systemPrompt[data-entered="true"] {
+  top: 21%;
+  opacity: 0.46;
 }
 
 .posterTitle {
@@ -397,6 +484,26 @@
     inset 0 0 22px rgba(255, 155, 56, 0.14);
 }
 
+.menuButtonMap {
+  border-color: rgba(124, 77, 255, 0.76);
+  background:
+    linear-gradient(90deg, rgba(66, 242, 255, 0.16), rgba(8, 6, 18, 0.9), rgba(124, 77, 255, 0.18)),
+    rgba(2, 2, 7, 0.86);
+  box-shadow:
+    0 0 18px rgba(124, 77, 255, 0.24),
+    inset 0 0 20px rgba(66, 242, 255, 0.1);
+}
+
+.menuButtonContact {
+  border-color: rgba(255, 211, 122, 0.78);
+  background:
+    linear-gradient(90deg, rgba(255, 211, 122, 0.14), rgba(8, 6, 14, 0.9), rgba(255, 155, 56, 0.12)),
+    rgba(2, 2, 5, 0.86);
+  box-shadow:
+    0 0 16px rgba(255, 211, 122, 0.18),
+    inset 0 0 20px rgba(255, 211, 122, 0.09);
+}
+
 .menuIcon {
   display: grid;
   width: 44px;
@@ -515,6 +622,34 @@
   }
 }
 
+@keyframes glyphFloat {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(-3deg);
+    opacity: 0.34;
+  }
+  50% {
+    transform: translate3d(12px, -18px, 0) rotate(4deg);
+    opacity: 0.72;
+  }
+}
+
+@keyframes systemBoot {
+  0%,
+  100% {
+    opacity: 0.28;
+    transform: translateX(-50%) translateY(0);
+  }
+  12%,
+  35% {
+    opacity: 0.86;
+  }
+  50% {
+    opacity: 0.42;
+    transform: translateX(-50%) translateY(-4px);
+  }
+}
+
 @keyframes portalPulse {
   0%,
   100% {
@@ -563,10 +698,44 @@
     padding-left: 8vw;
   }
 
+  .learningGlyphs span:nth-child(1) {
+    top: 20%;
+    left: 22%;
+  }
+
+  .learningGlyphs span:nth-child(2) {
+    top: 25%;
+    right: 37%;
+  }
+
+  .learningGlyphs span:nth-child(3) {
+    top: 55%;
+    left: 13%;
+  }
+
+  .learningGlyphs span:nth-child(4) {
+    top: 42%;
+    right: 36%;
+  }
+
+  .learningGlyphs span:nth-child(5) {
+    top: 64%;
+    right: 45%;
+  }
+
   .topMark {
     align-self: flex-start;
     margin-top: max(8px, env(safe-area-inset-top));
     margin-left: 0;
+  }
+
+  .systemPrompt {
+    top: 14vh;
+    right: clamp(40px, 8vw, 128px);
+    left: auto;
+    width: clamp(320px, 30vw, 420px);
+    text-align: left;
+    transform: none;
   }
 
   .posterTitle {
@@ -629,6 +798,13 @@
       rgba(10, 3, 8, 0.96);
   }
 
+  .menuButtonMap,
+  .menuButtonContact {
+    background:
+      linear-gradient(90deg, rgba(66, 242, 255, 0.12), rgba(8, 6, 14, 0.96), rgba(124, 77, 255, 0.14)),
+      rgba(2, 2, 5, 0.94);
+  }
+
   .menuTitle {
     font-size: clamp(1.3rem, 2vw, 2rem);
   }
@@ -663,12 +839,30 @@
       transform: skewX(-5deg) translateY(-3px);
     }
   }
+
+  @keyframes systemBoot {
+    0%,
+    100% {
+      opacity: 0.3;
+      transform: translateY(0);
+    }
+    12%,
+    35% {
+      opacity: 0.82;
+    }
+    50% {
+      opacity: 0.46;
+      transform: translateY(-3px);
+    }
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .topMark,
   .posterTitle,
   .taglineBlock,
+  .learningGlyphs span,
+  .systemPrompt,
   .fallbackPortal,
   .enterButton::after {
     animation: none;

@@ -13,6 +13,9 @@ export type BlockyDancerHandle = {
   leftLeg: THREE.Group | null;
   rightLeg: THREE.Group | null;
   scarf: THREE.Group | null;
+  chestLight: THREE.Mesh | null;
+  leftEye: THREE.Mesh | null;
+  rightEye: THREE.Mesh | null;
   setDancing: (active: boolean) => void;
 };
 
@@ -62,6 +65,9 @@ export const BlockyDancer = forwardRef<BlockyDancerHandle, BlockyDancerProps>(fu
   const leftLegRef = useRef<THREE.Group>(null);
   const rightLegRef = useRef<THREE.Group>(null);
   const scarfRef = useRef<THREE.Group>(null);
+  const chestLightRef = useRef<THREE.Mesh>(null);
+  const leftEyeRef = useRef<THREE.Mesh>(null);
+  const rightEyeRef = useRef<THREE.Mesh>(null);
   const dancingRef = useRef(false);
   const elapsedRef = useRef(0);
 
@@ -100,6 +106,15 @@ export const BlockyDancer = forwardRef<BlockyDancerHandle, BlockyDancerProps>(fu
     },
     get scarf() {
       return scarfRef.current;
+    },
+    get chestLight() {
+      return chestLightRef.current;
+    },
+    get leftEye() {
+      return leftEyeRef.current;
+    },
+    get rightEye() {
+      return rightEyeRef.current;
     },
     setDancing(active: boolean) {
       dancingRef.current = active;
@@ -145,6 +160,22 @@ export const BlockyDancer = forwardRef<BlockyDancerHandle, BlockyDancerProps>(fu
       scarfRef.current.rotation.y = Math.sin(time * 1.9) * 0.12;
       scarfRef.current.rotation.z = Math.sin(time * 2.6) * 0.08;
     }
+
+    if (chestLightRef.current) {
+      const pulse = 1 + Math.sin(time * 2.7) * 0.18;
+      chestLightRef.current.scale.set(0.2 * pulse, 0.2 * pulse, 0.09);
+      const material = chestLightRef.current.material;
+      if (material instanceof THREE.MeshStandardMaterial) {
+        material.emissiveIntensity = 0.7 + Math.sin(time * 2.7) * 0.28;
+      }
+    }
+
+    if (leftEyeRef.current && rightEyeRef.current) {
+      const blinkPhase = Math.sin(time * 1.15);
+      const eyeY = blinkPhase > 0.965 ? 0.012 : 0.055;
+      leftEyeRef.current.scale.y = eyeY;
+      rightEyeRef.current.scale.y = eyeY;
+    }
   });
 
   return (
@@ -155,16 +186,26 @@ export const BlockyDancer = forwardRef<BlockyDancerHandle, BlockyDancerProps>(fu
           <boxGeometry args={[1, 1, 1]} />
         </mesh>
         <BlockMesh color="#241438" emissive="#ff3752" scale={[0.9, 0.18, 0.54]} position={[0, 1.74, 0.01]} />
-        <BlockMesh color="#ff9b38" emissive="#ff9b38" scale={[0.18, 0.18, 0.08]} position={[-0.24, 1.52, 0.28]} />
-        <BlockMesh color="#42f2ff" emissive="#42f2ff" scale={[0.18, 0.18, 0.08]} position={[0.24, 1.52, 0.28]} />
+        <mesh ref={chestLightRef} position={[0, 1.52, 0.29]} scale={[0.2, 0.2, 0.09]}>
+          <boxGeometry args={[1, 1, 1]} />
+          <meshStandardMaterial color="#42f2ff" emissive="#42f2ff" emissiveIntensity={0.82} roughness={0.38} />
+        </mesh>
+        <BlockMesh color="#ff9b38" emissive="#ff9b38" scale={[0.12, 0.12, 0.07]} position={[-0.28, 1.52, 0.28]} />
+        <BlockMesh color="#ff3752" emissive="#ff3752" scale={[0.12, 0.12, 0.07]} position={[0.28, 1.52, 0.28]} />
       </group>
 
       <group ref={headRef} position={[0, 2.05, 0]}>
         <BlockMesh color="#20162d" emissive="#7c4dff" scale={[0.62, 0.58, 0.58]} />
         <BlockMesh color="#07060b" scale={[0.68, 0.18, 0.62]} position={[0, 0.36, -0.02]} />
         <BlockMesh color="#07060b" scale={[0.18, 0.18, 0.18]} position={[-0.26, 0.22, 0.16]} />
-        <BlockMesh color="#42f2ff" emissive="#42f2ff" scale={[0.08, 0.055, 0.035]} position={[-0.15, 0.04, 0.31]} />
-        <BlockMesh color="#42f2ff" emissive="#42f2ff" scale={[0.08, 0.055, 0.035]} position={[0.15, 0.04, 0.31]} />
+        <mesh ref={leftEyeRef} position={[-0.15, 0.04, 0.31]} scale={[0.08, 0.055, 0.035]}>
+          <boxGeometry args={[1, 1, 1]} />
+          <meshStandardMaterial color="#42f2ff" emissive="#42f2ff" emissiveIntensity={0.9} roughness={0.32} />
+        </mesh>
+        <mesh ref={rightEyeRef} position={[0.15, 0.04, 0.31]} scale={[0.08, 0.055, 0.035]}>
+          <boxGeometry args={[1, 1, 1]} />
+          <meshStandardMaterial color="#42f2ff" emissive="#42f2ff" emissiveIntensity={0.9} roughness={0.32} />
+        </mesh>
       </group>
 
       <group ref={scarfRef} position={[0.1, 1.77, 0.03]}>
