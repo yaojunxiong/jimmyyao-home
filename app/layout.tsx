@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://jimmyyao.com"),
+  metadataBase: new URL("https://www.jimmyyao.com"),
   title: "Jimmy Yao｜AI・学習・デジタルライフ",
   description:
     "Jimmy Yao の個人サイト。AIツール、学習システム、日本語学習、日本生活、デジタルライフの記録と探索。Personal website about AI tools, learning systems, Japanese learning and digital life.",
@@ -48,7 +48,7 @@ export const metadata: Metadata = {
     title: "Jimmy Yao｜AI・学習・デジタルライフ",
     description:
       "AIツール、学習システム、日本語学習、日本生活、デジタルライフの記録と探索。Personal website about AI tools, learning systems, Japanese learning and digital life.",
-    url: "https://jimmyyao.com",
+    url: "https://www.jimmyyao.com",
     siteName: "jimmyyao.com",
     type: "website",
     images: [
@@ -84,7 +84,7 @@ export default function RootLayout({
   return (
     <html lang="ja">
       <head>
-        <link rel="canonical" href="https://jimmyyao.com/" />
+        <link rel="canonical" href="https://www.jimmyyao.com/" />
       </head>
       <body>{children}</body>
     </html>
