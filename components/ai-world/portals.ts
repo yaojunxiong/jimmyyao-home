@@ -4,8 +4,13 @@ export type AiWorldPortal = {
   id: AiWorldPortalId;
   titleJa: string;
   titleZh: string;
-  subtitle: string;
-  description: string;
+  titleEn: string;
+  subtitleJa: string;
+  subtitleZh: string;
+  subtitleEn: string;
+  descriptionJa: string;
+  descriptionZh: string;
+  descriptionEn: string;
   url: string | null;
   enabled: boolean;
   position: readonly [number, number, number];
@@ -19,8 +24,13 @@ export const aiWorldPortals: AiWorldPortal[] = [
     id: "study",
     titleJa: "日本語学校",
     titleZh: "日语学习系统",
-    subtitle: "日本語学習システム",
-    description: "学ぶ・練習・テスト",
+    titleEn: "Japanese School",
+    subtitleJa: "日本語学習システム",
+    subtitleZh: "日语学习系统",
+    subtitleEn: "Japanese learning system",
+    descriptionJa: "学ぶ・練習・テスト",
+    descriptionZh: "学习・练习・测试",
+    descriptionEn: "Learn, practice, and test",
     url: "https://study.jimmyyao.com",
     enabled: true,
     position: [-3.18, 0.25, 1.18],
@@ -32,8 +42,13 @@ export const aiWorldPortals: AiWorldPortal[] = [
     id: "forum",
     titleJa: "フォーラム広場",
     titleZh: "论坛系统",
-    subtitle: "フォーラムシステム",
-    description: "コミュニティ・交流",
+    titleEn: "Forum Plaza",
+    subtitleJa: "フォーラムシステム",
+    subtitleZh: "论坛系统",
+    subtitleEn: "Community forum",
+    descriptionJa: "コミュニティ・交流",
+    descriptionZh: "社区・交流",
+    descriptionEn: "Community and exchange",
     url: "https://forum.jimmyyao.com",
     enabled: true,
     position: [-1.78, 0.25, -2.58],
@@ -45,8 +60,13 @@ export const aiWorldPortals: AiWorldPortal[] = [
     id: "knowledge",
     titleJa: "知識の図書館",
     titleZh: "知识库",
-    subtitle: "知識ベース",
-    description: "資料・ガイド・文書",
+    titleEn: "Knowledge Library",
+    subtitleJa: "知識ベース",
+    subtitleZh: "知识库",
+    subtitleEn: "Knowledge base",
+    descriptionJa: "資料・ガイド・文書",
+    descriptionZh: "资料・指南・文档",
+    descriptionEn: "Resources, guides, and docs",
     url: null,
     enabled: false,
     position: [1.45, 0.25, -2.62],
@@ -58,8 +78,13 @@ export const aiWorldPortals: AiWorldPortal[] = [
     id: "ai-lab",
     titleJa: "AIラボ",
     titleZh: "AI 工具中心",
-    subtitle: "AIツールセンター",
-    description: "支援・生成・分析",
+    titleEn: "AI Lab",
+    subtitleJa: "AIツールセンター",
+    subtitleZh: "AI 工具中心",
+    subtitleEn: "AI tools center",
+    descriptionJa: "支援・生成・分析",
+    descriptionZh: "辅助・生成・分析",
+    descriptionEn: "Assist, generate, and analyze",
     url: null,
     enabled: false,
     position: [3.12, 0.25, 0.78],
@@ -71,8 +96,13 @@ export const aiWorldPortals: AiWorldPortal[] = [
     id: "admin",
     titleJa: "管理センター",
     titleZh: "管理后台",
-    subtitle: "管理システム",
-    description: "設定・データ・承認",
+    titleEn: "Admin Center",
+    subtitleJa: "管理システム",
+    subtitleZh: "管理系统",
+    subtitleEn: "Admin system",
+    descriptionJa: "設定・データ・承認",
+    descriptionZh: "设置・数据・审核",
+    descriptionEn: "Settings, data, and approvals",
     url: null,
     enabled: false,
     position: [2.1, 0.25, 2.42],

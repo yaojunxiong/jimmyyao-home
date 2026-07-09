@@ -9,6 +9,7 @@ import { FloatingIsland } from "./FloatingIsland";
 import { JyCharacter, type JyCharacterHandle, type UserCharacterProfile } from "./JyCharacter";
 import { PortalBuilding } from "./PortalBuilding";
 import { SakuraParticles } from "./SakuraParticles";
+import { aiWorldCopy, type AiWorldLanguage } from "./i18n";
 import { aiWorldPortals, getAiWorldPortal, type AiWorldPortalId } from "./portals";
 import styles from "./ai-world.module.css";
 
@@ -26,6 +27,7 @@ type AiWorldCanvasProps = {
   hoveredPortal: AiWorldPortalId | null;
   isTransitioning: boolean;
   characterProfile: UserCharacterProfile;
+  language: AiWorldLanguage;
   onPortalHover: (id: AiWorldPortalId | null) => void;
   onPortalSelect: (id: AiWorldPortalId) => void;
 };
@@ -114,6 +116,7 @@ function SceneContent({
   hoveredPortal,
   isTransitioning,
   characterProfile,
+  language,
   lowPerformance,
   onPortalHover,
   onPortalSelect,
@@ -277,6 +280,7 @@ function SceneContent({
             active={activePortal === portal.id}
             hovered={hoveredPortal === portal.id}
             disabled={isTransitioning}
+            language={language}
             onHover={onPortalHover}
             onSelect={onPortalSelect}
           />
@@ -401,11 +405,13 @@ export const AiWorldCanvas = forwardRef<AiWorldCanvasHandle, AiWorldCanvasProps>
   }), []);
 
   if (webglSupported === false) {
+    const copy = aiWorldCopy[props.language];
+
     return (
       <div className={styles.webglFallback}>
         <div>
-          <strong>AI Learning World</strong>
-          <span>WebGL が利用できません。下のリンクから各システムへ移動できます。</span>
+          <strong>{copy.webglTitle}</strong>
+          <span>{copy.webglText}</span>
         </div>
       </div>
     );

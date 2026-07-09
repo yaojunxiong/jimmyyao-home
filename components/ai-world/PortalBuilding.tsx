@@ -4,6 +4,7 @@ import { Billboard, Text } from "@react-three/drei";
 import { ThreeEvent, useFrame } from "@react-three/fiber";
 import { useRef } from "react";
 import * as THREE from "three";
+import { aiWorldCopy, portalTitle, type AiWorldLanguage } from "./i18n";
 import type { AiWorldPortal, AiWorldPortalId } from "./portals";
 
 type PortalBuildingProps = {
@@ -11,6 +12,7 @@ type PortalBuildingProps = {
   active: boolean;
   hovered: boolean;
   disabled: boolean;
+  language: AiWorldLanguage;
   onHover: (id: AiWorldPortalId | null) => void;
   onSelect: (id: AiWorldPortalId) => void;
 };
@@ -306,6 +308,7 @@ export function PortalBuilding({
   active,
   hovered,
   disabled,
+  language,
   onHover,
   onSelect
 }: PortalBuildingProps) {
@@ -316,7 +319,9 @@ export function PortalBuilding({
   const signRef = useRef<THREE.Group>(null);
   const portalGlowRef = useRef<THREE.Mesh>(null);
   const isLit = active || hovered;
-  const signFontSize = portal.titleJa.length > 6 ? 0.145 : 0.195;
+  const signLabel = portalTitle(portal, language);
+  const signFontSize = signLabel.length > 13 ? 0.105 : signLabel.length > 7 ? 0.135 : 0.195;
+  const copy = aiWorldCopy[language];
 
   useFrame(({ clock }, delta) => {
     const time = clock.elapsedTime;
@@ -430,12 +435,12 @@ export function PortalBuilding({
             <meshBasicMaterial color={portal.color} transparent opacity={isLit ? 0.82 : 0.45} />
           </mesh>
           <Text position={[0, 0.018, 0.052]} fontSize={signFontSize} anchorX="center" anchorY="middle" color="#2f2418" maxWidth={1.42}>
-            {portal.titleJa}
+            {signLabel}
           </Text>
         </group>
       </Billboard>
       <Text position={[0, -0.03, 0.92]} rotation={[-Math.PI / 2, 0, 0]} fontSize={0.13} anchorX="center" anchorY="middle" color={portal.enabled ? portal.color : "#7d6f60"}>
-        {portal.enabled ? "ENTER" : "COMING SOON"}
+        {portal.enabled ? copy.enter : copy.soon}
       </Text>
     </group>
   );

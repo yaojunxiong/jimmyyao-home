@@ -6,11 +6,10 @@ import { AudioController } from "@/components/anime-gate/AudioController";
 import { TransitionOverlay } from "@/components/anime-gate/TransitionOverlay";
 import { AiWorldCanvas, type AiWorldCanvasHandle } from "./AiWorldCanvas";
 import { AiWorldOverlay } from "./AiWorldOverlay";
+import { aiWorldCopy, detectAiWorldLanguage, portalStatus, type AiWorldLanguage } from "./i18n";
 import { getAiWorldPortal, type AiWorldPortalId } from "./portals";
 import { createUserCharacterProfile, guestCharacterProfile } from "./user-character-profile";
 import styles from "./ai-world.module.css";
-
-const defaultStatus = "WASD / 方向キー / 地面タップでJYを走らせよう";
 
 export function AiWorldHero() {
   const canvasRef = useRef<AiWorldCanvasHandle | null>(null);
@@ -21,7 +20,9 @@ export function AiWorldHero() {
   const [hoveredPortal, setHoveredPortal] = useState<AiWorldPortalId | null>(null);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
-  const [statusMessage, setStatusMessage] = useState(defaultStatus);
+  const [language, setLanguage] = useState<AiWorldLanguage>("ja");
+  const copy = aiWorldCopy[language];
+  const [statusMessage, setStatusMessage] = useState(copy.defaultStatus);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const characterProfile = useMemo(() => createUserCharacterProfile(userEmail), [userEmail]);
 
@@ -48,15 +49,15 @@ export function AiWorldHero() {
     setHoveredPortal(id);
 
     if (!id) {
-      setStatusMessage(defaultStatus);
+      setStatusMessage(copy.defaultStatus);
       return;
     }
 
     const portal = getAiWorldPortal(id);
     if (portal) {
-      setStatusMessage(`${portal.titleJa} / ${portal.subtitle} / ${portal.description}`);
+      setStatusMessage(portalStatus(portal, language));
     }
-  }, [isTransitioning]);
+  }, [copy.defaultStatus, isTransitioning, language]);
 
   const handlePortalSelect = useCallback((id: AiWorldPortalId) => {
     if (isTransitioning) return;
@@ -69,23 +70,23 @@ export function AiWorldHero() {
     void playAudio();
 
     if (!portal.enabled || !portal.url) {
-      setStatusMessage("この入口はまもなく公開されます");
+      setStatusMessage(copy.comingSoon);
       canvasRef.current?.travelToPortal({
         id,
         reducedMotion: prefersReducedMotion(),
-        onArrive: () => setStatusMessage("この入口はまもなく公開されます")
+        onArrive: () => setStatusMessage(copy.comingSoon)
       });
       return;
     }
 
     setIsTransitioning(true);
-    setStatusMessage(`JYが${portal.titleJa}へ向かっています...`);
+    setStatusMessage(copy.movingTo(portal));
 
     canvasRef.current?.travelToPortal({
       id,
       reducedMotion: prefersReducedMotion(),
       onArrive: () => {
-        setStatusMessage(`${portal.subtitle}に入ります`);
+        setStatusMessage(copy.entering(portal));
         gsap.fromTo(
           transitionOverlayRef.current,
           { autoAlpha: 0 },
@@ -98,7 +99,13 @@ export function AiWorldHero() {
         }, 780);
       }
     });
-  }, [isTransitioning, playAudio, prefersReducedMotion]);
+  }, [copy, isTransitioning, playAudio, prefersReducedMotion]);
+
+  const handleLanguageChange = useCallback((nextLanguage: AiWorldLanguage) => {
+    setLanguage(nextLanguage);
+    window.localStorage.setItem("jimmyyao:language", nextLanguage);
+    setStatusMessage(aiWorldCopy[nextLanguage].defaultStatus);
+  }, []);
 
   const handleSoundToggle = useCallback(() => {
     setSoundEnabled((current) => {
@@ -133,6 +140,10 @@ export function AiWorldHero() {
     if (audioRef.current) {
       audioRef.current.volume = 0.3;
     }
+
+    const detectedLanguage = detectAiWorldLanguage();
+    setLanguage(detectedLanguage);
+    setStatusMessage(aiWorldCopy[detectedLanguage].defaultStatus);
 
     const params = new URLSearchParams(window.location.search);
     const previewEmail = params.get("email");
@@ -180,6 +191,7 @@ export function AiWorldHero() {
         hoveredPortal={hoveredPortal}
         isTransitioning={isTransitioning}
         characterProfile={characterProfile}
+        language={language}
         onPortalHover={handlePortalHover}
         onPortalSelect={handlePortalSelect}
       />
@@ -187,10 +199,17 @@ export function AiWorldHero() {
         statusMessage={statusMessage}
         userInitial={characterProfile.initial}
         userEmail={characterProfile.email}
+        language={language}
+        onLanguageChange={handleLanguageChange}
         onSignIn={handleSignIn}
         onSignOut={handleSignOut}
       />
-      <AudioController audioRef={audioRef} soundEnabled={soundEnabled} onToggle={handleSoundToggle} />
+      <AudioController
+        audioRef={audioRef}
+        soundEnabled={soundEnabled}
+        onToggle={handleSoundToggle}
+        labels={{ on: copy.soundOn, off: copy.soundOff }}
+      />
       <TransitionOverlay ref={transitionOverlayRef} />
     </main>
   );

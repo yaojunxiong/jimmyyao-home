@@ -1,11 +1,14 @@
 "use client";
 
+import { aiWorldCopy, aiWorldLanguages, type AiWorldLanguage } from "./i18n";
 import styles from "./ai-world.module.css";
 
 type AiWorldOverlayProps = {
   statusMessage: string;
   userInitial: string;
   userEmail: string | null;
+  language: AiWorldLanguage;
+  onLanguageChange: (language: AiWorldLanguage) => void;
   onSignIn: () => void;
   onSignOut: () => void;
 };
@@ -14,9 +17,13 @@ export function AiWorldOverlay({
   statusMessage,
   userInitial,
   userEmail,
+  language,
+  onLanguageChange,
   onSignIn,
   onSignOut
 }: AiWorldOverlayProps) {
+  const copy = aiWorldCopy[language];
+
   return (
     <section className={styles.overlayRoot}>
       <div className={styles.brandPill}>
@@ -25,6 +32,20 @@ export function AiWorldOverlay({
           <strong>JY</strong>
           <small>AI Learning World</small>
         </span>
+      </div>
+
+      <div className={styles.languagePill} aria-label={copy.languageLabel}>
+        {aiWorldLanguages.map((item) => (
+          <button
+            key={item.code}
+            type="button"
+            aria-pressed={language === item.code}
+            title={item.label}
+            onClick={() => onLanguageChange(item.code)}
+          >
+            {item.shortLabel}
+          </button>
+        ))}
       </div>
 
       <div className={styles.bottomPrompt} aria-live="polite">
@@ -37,12 +58,12 @@ export function AiWorldOverlay({
         onClick={userEmail ? onSignOut : onSignIn}
       >
         <span>{userEmail ? userInitial : "?"}</span>
-        <strong>{userEmail ? "SIGN OUT" : "SIGN IN"}</strong>
+        <strong>{userEmail ? copy.authSignOut : copy.authSignIn}</strong>
       </button>
 
       <div className={styles.seoLinks} aria-label="Public site links">
-        <a href="/entry/study">日本語学校 / 日语学习系统</a>
-        <a href="/entry/forum">フォーラム広場 / 论坛系统</a>
+        <a href="/entry/study">{copy.seoStudy}</a>
+        <a href="/entry/forum">{copy.seoForum}</a>
       </div>
     </section>
   );
