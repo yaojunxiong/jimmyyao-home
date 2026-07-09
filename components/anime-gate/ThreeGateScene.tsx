@@ -1,38 +1,38 @@
 "use client";
 
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import gsap from "gsap";
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 import type { MutableRefObject, RefObject } from "react";
 import * as THREE from "three";
-import {
-  type CameraPreset,
-  enterWorldMotion,
-  openingMotion,
-  startLearningDance,
-  worldMapPortalMotion
-} from "@/lib/dancerAnimations";
+import { getWorldPortal, type WorldPortalKey } from "@/lib/world-portals";
 import { sceneConfig } from "@/lib/sceneConfig";
 import { BlockyDancer, type BlockyDancerHandle } from "./BlockyDancer";
-import { GeneratedWorld, type GeneratedWorldHandle } from "./GeneratedWorld";
+import { IslandWorld, type IslandWorldHandle } from "./IslandWorld";
 import styles from "./anime-gate.module.css";
 
 export type ThreeGateSceneHandle = {
-  enterWorld: (onComplete?: () => void) => void;
-  startDance: (options: { onComplete: () => void; reducedMotion: boolean }) => void;
-  openWorldMap: (options: { onComplete: () => void; reducedMotion: boolean }) => void;
+  travelToPortal: (options: {
+    key: WorldPortalKey;
+    reducedMotion: boolean;
+    onArrive?: () => void;
+    onComplete?: () => void;
+  }) => void;
+};
+
+type ThreeGateSceneProps = {
+  activePortal?: WorldPortalKey | null;
+  onPortalSelect: (key: WorldPortalKey) => void;
+  transitionOverlayRef: RefObject<HTMLDivElement | null>;
 };
 
 type SceneRefs = {
   camera: THREE.PerspectiveCamera | null;
   lookAt: THREE.Vector3;
   dancer: BlockyDancerHandle | null;
-  world: GeneratedWorldHandle | null;
-  cameraPreset: CameraPreset;
+  island: IslandWorldHandle | null;
+  isDesktop: boolean;
 };
-
-function applyVector3(target: THREE.Vector3, value: readonly [number, number, number]) {
-  target.set(value[0], value[1], value[2]);
-}
 
 function hasWebGL() {
   if (typeof window === "undefined") {
@@ -64,172 +64,218 @@ function useDesktopLayout() {
   return isDesktop;
 }
 
-function SceneContent({ isDesktop, sceneRefs }: { isDesktop: boolean; sceneRefs: MutableRefObject<SceneRefs> }) {
+function useLowPerformanceMode() {
+  const [lowPerformance, setLowPerformance] = useState(false);
+
+  useEffect(() => {
+    const nav = navigator as Navigator & { deviceMemory?: number };
+    const smallCpu = navigator.hardwareConcurrency ? navigator.hardwareConcurrency <= 4 : false;
+    const smallMemory = nav.deviceMemory ? nav.deviceMemory <= 4 : false;
+    const narrowScreen = window.matchMedia("(max-width: 430px)").matches;
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    setLowPerformance(reducedMotion || (narrowScreen && (smallCpu || smallMemory)));
+  }, []);
+
+  return lowPerformance;
+}
+
+function getCameraPreset(isDesktop: boolean) {
+  return isDesktop
+    ? {
+        position: new THREE.Vector3(0, 5.25, 6.9),
+        lookAt: new THREE.Vector3(0, 0.48, -0.22),
+        scenePosition: [-0.85, -0.54, 0] as const,
+        sceneScale: 0.94
+      }
+    : {
+        position: new THREE.Vector3(0, 5.55, 7.45),
+        lookAt: new THREE.Vector3(0, 0.42, -0.2),
+        scenePosition: [0, -0.72, 0] as const,
+        sceneScale: 0.82
+      };
+}
+
+function SceneContent({
+  activePortal,
+  lowPerformance,
+  onPortalSelect,
+  sceneRefs
+}: {
+  activePortal?: WorldPortalKey | null;
+  lowPerformance: boolean;
+  onPortalSelect: (key: WorldPortalKey) => void;
+  sceneRefs: MutableRefObject<SceneRefs>;
+}) {
   const dancerRef = useRef<BlockyDancerHandle | null>(null);
-  const worldRef = useRef<GeneratedWorldHandle | null>(null);
+  const islandRef = useRef<IslandWorldHandle | null>(null);
   const sceneGroupRef = useRef<THREE.Group>(null);
-  const openingPlayedRef = useRef(false);
-  const { camera } = useThree();
-  const cameraPreset = isDesktop ? sceneConfig.camera.desktop : sceneConfig.camera.mobile;
-  const layoutPreset = isDesktop ? sceneConfig.layout.desktop : sceneConfig.layout.mobile;
+  const { camera, pointer } = useThree();
+  const isDesktop = sceneRefs.current.isDesktop;
+  const preset = getCameraPreset(isDesktop);
 
   useEffect(() => {
     const perspectiveCamera = camera as THREE.PerspectiveCamera;
-    applyVector3(perspectiveCamera.position, cameraPreset.initialPosition);
-    perspectiveCamera.lookAt(sceneRefs.current.lookAt);
+    perspectiveCamera.position.copy(preset.position);
+    sceneRefs.current.lookAt.copy(preset.lookAt);
     sceneRefs.current.camera = perspectiveCamera;
-    sceneRefs.current.cameraPreset = cameraPreset;
-  }, [camera, cameraPreset, sceneRefs]);
-
-  useEffect(() => {
     sceneRefs.current.dancer = dancerRef.current;
-    sceneRefs.current.world = worldRef.current;
-    sceneRefs.current.cameraPreset = cameraPreset;
+    sceneRefs.current.island = islandRef.current;
+  }, [camera, preset.lookAt, preset.position, sceneRefs]);
 
-    if (!openingPlayedRef.current && sceneRefs.current.camera && dancerRef.current && worldRef.current) {
-      openingPlayedRef.current = true;
-      openingMotion({
-        camera: sceneRefs.current.camera,
-        cameraLookAt: sceneRefs.current.lookAt,
-        dancer: dancerRef.current,
-        world: worldRef.current,
-        cameraPreset
-      });
-    }
-  }, [cameraPreset, sceneRefs]);
+  useFrame(({ clock }) => {
+    const time = clock.getElapsedTime();
 
-  useEffect(() => {
-    const cameraObject = sceneRefs.current.camera;
-    if (!cameraObject || !openingPlayedRef.current) {
-      applyVector3(sceneRefs.current.lookAt, cameraPreset.lookAt);
-      return;
+    if (sceneGroupRef.current) {
+      sceneGroupRef.current.rotation.y = pointer.x * 0.08;
+      sceneGroupRef.current.rotation.x = -pointer.y * 0.025;
     }
 
-    applyVector3(cameraObject.position, cameraPreset.initialPosition);
-    applyVector3(sceneRefs.current.lookAt, cameraPreset.lookAt);
-  }, [cameraPreset, sceneRefs]);
-
-  useFrame(() => {
     if (sceneRefs.current.camera) {
       sceneRefs.current.camera.lookAt(sceneRefs.current.lookAt);
+    }
+
+    if (islandRef.current?.root) {
+      islandRef.current.root.position.y = Math.sin(time * 0.8) * 0.04;
     }
   });
 
   return (
     <>
-      <color attach="background" args={[sceneConfig.colors.night]} />
-      <fog attach="fog" args={[sceneConfig.colors.night, 7.5, 15]} />
-      <ambientLight intensity={0.42} color="#9ba8ff" />
-      <hemisphereLight args={["#5f7dff", "#1b0710", 0.86]} />
-      <directionalLight position={[2, 5, 4]} intensity={0.9} color="#fff3d2" />
-      <group ref={sceneGroupRef} position={layoutPreset.scenePosition} scale={layoutPreset.sceneScale}>
-        <GeneratedWorld ref={worldRef} />
-        <BlockyDancer ref={dancerRef} position={layoutPreset.dancerPosition} scale={layoutPreset.dancerScale} />
+      <color attach="background" args={["#73c9ff"]} />
+      <fog attach="fog" args={["#bdeeff", 9, 20]} />
+      <ambientLight intensity={0.86} color="#fff6df" />
+      <hemisphereLight args={["#dff7ff", "#8bcf74", 1.05]} />
+      <directionalLight position={[4, 7, 4]} intensity={1.55} color="#fff5d6" />
+      <pointLight position={[0, 2.4, 0]} color="#ffe6a6" intensity={1.4} distance={7} />
+      <group ref={sceneGroupRef} position={preset.scenePosition} scale={preset.sceneScale}>
+        <IslandWorld ref={islandRef} activePortal={activePortal} lowPerformance={lowPerformance} onPortalSelect={onPortalSelect} />
+        <BlockyDancer ref={dancerRef} position={[0, 0.18, 0.18]} scale={0.44} />
       </group>
     </>
   );
 }
 
-export const ThreeGateScene = forwardRef<ThreeGateSceneHandle, { transitionOverlayRef: RefObject<HTMLDivElement | null> }>(
-  function ThreeGateScene({ transitionOverlayRef }, ref) {
-    const [webglSupported, setWebglSupported] = useState<boolean | null>(null);
-    const isDesktop = useDesktopLayout();
-    const sceneRefs = useRef<SceneRefs>({
-      camera: null,
-      lookAt: new THREE.Vector3(
-        sceneConfig.camera.mobile.lookAt[0],
-        sceneConfig.camera.mobile.lookAt[1],
-        sceneConfig.camera.mobile.lookAt[2]
-      ),
-      dancer: null,
-      world: null,
-      cameraPreset: sceneConfig.camera.mobile
-    });
+export const ThreeGateScene = forwardRef<ThreeGateSceneHandle, ThreeGateSceneProps>(function ThreeGateScene(
+  { activePortal, onPortalSelect, transitionOverlayRef },
+  ref
+) {
+  const [webglSupported, setWebglSupported] = useState<boolean | null>(null);
+  const isDesktop = useDesktopLayout();
+  const lowPerformance = useLowPerformanceMode();
+  const sceneRefs = useRef<SceneRefs>({
+    camera: null,
+    lookAt: new THREE.Vector3(0, 0.42, 0),
+    dancer: null,
+    island: null,
+    isDesktop: false
+  });
 
-    useEffect(() => {
-      setWebglSupported(hasWebGL());
-    }, []);
+  useEffect(() => {
+    setWebglSupported(hasWebGL());
+  }, []);
 
-    useImperativeHandle(ref, () => ({
-      enterWorld(onComplete) {
-        const { camera, lookAt, dancer, world } = sceneRefs.current;
-        if (!camera) {
-          onComplete?.();
-          return;
-        }
-
-        enterWorldMotion({
-          camera,
-          cameraLookAt: lookAt,
-          dancer,
-          world,
-          cameraPreset: sceneRefs.current.cameraPreset,
-          onComplete
-        });
-      },
-      startDance({ onComplete, reducedMotion }) {
-        const { camera, lookAt, dancer, world } = sceneRefs.current;
-        if (!camera) {
-          onComplete();
-          return;
-        }
-
-        startLearningDance({
-          camera,
-          cameraLookAt: lookAt,
-          dancer,
-          world,
-          reducedMotion,
-          transitionOverlay: transitionOverlayRef.current,
-          cameraPreset: sceneRefs.current.cameraPreset,
-          onComplete
-        });
-      },
-      openWorldMap({ onComplete, reducedMotion }) {
-        const { camera, lookAt, world } = sceneRefs.current;
-        if (!camera) {
-          onComplete();
-          return;
-        }
-
-        worldMapPortalMotion({
-          camera,
-          cameraLookAt: lookAt,
-          world,
-          reducedMotion,
-          transitionOverlay: transitionOverlayRef.current,
-          cameraPreset: sceneRefs.current.cameraPreset,
-          onComplete
-        });
-      }
-    }), [transitionOverlayRef]);
-
-    if (webglSupported === false) {
-      return (
-        <div className={styles.webglFallback} aria-hidden="true">
-          <div className={styles.fallbackGrid} />
-          <div className={styles.fallbackPortal} />
-        </div>
-      );
+  useEffect(() => {
+    sceneRefs.current.isDesktop = isDesktop;
+    const camera = sceneRefs.current.camera;
+    if (camera) {
+      const preset = getCameraPreset(isDesktop);
+      camera.position.copy(preset.position);
+      sceneRefs.current.lookAt.copy(preset.lookAt);
     }
+  }, [isDesktop]);
 
+  useImperativeHandle(ref, () => ({
+    travelToPortal({ key, reducedMotion, onArrive, onComplete }) {
+      const portal = getWorldPortal(key);
+      const { camera, dancer, island, lookAt, isDesktop: desktop } = sceneRefs.current;
+
+      if (!portal || !camera || !dancer?.root) {
+        onArrive?.();
+        onComplete?.();
+        return;
+      }
+
+      island?.activatePortal(key);
+
+      const destination = new THREE.Vector3(portal.position[0] * 0.78, 0.18, portal.position[2] * 0.78);
+      const current = dancer.root.position.clone();
+      const dx = destination.x - current.x;
+      const dz = destination.z - current.z;
+      const facing = Math.atan2(dx, dz);
+
+      if (reducedMotion) {
+        dancer.root.position.copy(destination);
+        dancer.root.rotation.y = facing;
+        onArrive?.();
+        onComplete?.();
+        return;
+      }
+
+      dancer.setDancing(true);
+
+      const cameraTarget = desktop
+        ? new THREE.Vector3(destination.x * 0.18, 4.8, 6.25)
+        : new THREE.Vector3(destination.x * 0.12, 5.15, 6.85);
+
+      const timeline = gsap.timeline({
+        defaults: { ease: "power2.inOut" },
+        onComplete: () => {
+          dancer.setDancing(false);
+          onComplete?.();
+        }
+      });
+
+      timeline.to(dancer.root.rotation, { y: facing, duration: 0.22, ease: "power2.out" }, 0);
+      timeline.to(dancer.root.position, { x: destination.x, z: destination.z, duration: 1.12, ease: "power2.inOut" }, 0.16);
+      timeline.to(camera.position, { x: cameraTarget.x, y: cameraTarget.y, z: cameraTarget.z, duration: 1.08, ease: "power2.inOut" }, 0.16);
+      timeline.to(lookAt, { x: destination.x * 0.35, y: 0.62, z: destination.z * 0.35 - 0.12, duration: 1.08, ease: "power2.inOut" }, 0.16);
+
+      if (dancer.leftArm && dancer.rightArm && dancer.leftLeg && dancer.rightLeg) {
+        timeline.to(dancer.leftArm.rotation, { x: -0.95, z: 0.65, duration: 0.18, repeat: 5, yoyo: true, ease: "sine.inOut" }, 0.2);
+        timeline.to(dancer.rightArm.rotation, { x: -0.2, z: -0.65, duration: 0.18, repeat: 5, yoyo: true, ease: "sine.inOut" }, 0.2);
+        timeline.to(dancer.leftLeg.rotation, { x: 0.36, duration: 0.18, repeat: 5, yoyo: true, ease: "sine.inOut" }, 0.2);
+        timeline.to(dancer.rightLeg.rotation, { x: -0.36, duration: 0.18, repeat: 5, yoyo: true, ease: "sine.inOut" }, 0.2);
+      }
+
+      timeline.add(() => {
+        onArrive?.();
+        if (transitionOverlayRef.current && portal.status === "live") {
+          gsap.fromTo(transitionOverlayRef.current, { autoAlpha: 0 }, { autoAlpha: 0.34, duration: 0.2, yoyo: true, repeat: 1 });
+        }
+      }, 1.25);
+    }
+  }), [transitionOverlayRef]);
+
+  if (webglSupported === false) {
     return (
-      <div className={styles.threeStage} aria-hidden="true">
-        {webglSupported && (
-          <Canvas
-            className={styles.threeCanvas}
-            dpr={[1, sceneConfig.performance.maxDpr]}
-            camera={{ position: sceneConfig.camera.mobile.initialPosition, fov: isDesktop ? 40 : 42, near: 0.1, far: 40 }}
-            gl={{
-              alpha: false,
-              antialias: true,
-              powerPreference: "high-performance"
-            }}
-          >
-            <SceneContent isDesktop={isDesktop} sceneRefs={sceneRefs} />
-          </Canvas>
-        )}
+      <div className={styles.webglFallback} aria-hidden="true">
+        <div className={styles.fallbackGrid} />
+        <div className={styles.fallbackPortal} />
       </div>
     );
   }
-);
+
+  return (
+    <div className={styles.threeStage} aria-hidden="true">
+      {webglSupported && (
+        <Canvas
+          className={styles.threeCanvas}
+          dpr={[1, lowPerformance ? 1.25 : sceneConfig.performance.maxDpr]}
+          camera={{ position: getCameraPreset(isDesktop).position, fov: isDesktop ? 42 : 47, near: 0.1, far: 40 }}
+          gl={{
+            alpha: false,
+            antialias: !lowPerformance,
+            powerPreference: "high-performance"
+          }}
+        >
+          <SceneContent
+            activePortal={activePortal}
+            lowPerformance={lowPerformance}
+            onPortalSelect={onPortalSelect}
+            sceneRefs={sceneRefs}
+          />
+        </Canvas>
+      )}
+    </div>
+  );
+});

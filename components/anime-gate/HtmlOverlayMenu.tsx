@@ -1,110 +1,177 @@
 "use client";
 
+import type { CSSProperties, RefObject } from "react";
+import { type WorldPortalKey, worldPortals } from "@/lib/world-portals";
 import styles from "./anime-gate.module.css";
 
 type HtmlOverlayMenuProps = {
-  contactHref: string;
-  hasEntered: boolean;
+  activePortal?: WorldPortalKey | null;
   isTransitioning: boolean;
-  onContact?: () => void;
-  onEnter: () => void;
-  onStart: () => void;
-  onWorldMap: () => void;
+  characterState: "idle" | "running" | "arrived";
+  characterRef: RefObject<HTMLDivElement | null>;
+  statusMessage: string;
+  onPortalSelect: (key: WorldPortalKey) => void;
+  onPortalHover: (key: WorldPortalKey | null) => void;
 };
 
 export function HtmlOverlayMenu({
-  contactHref,
-  hasEntered,
+  activePortal,
   isTransitioning,
-  onContact,
-  onEnter,
-  onStart,
-  onWorldMap
+  characterState,
+  characterRef,
+  statusMessage,
+  onPortalSelect,
+  onPortalHover
 }: HtmlOverlayMenuProps) {
   return (
-    <section className={`${styles.uiLayer} pointer-events-none fixed inset-0 z-20 flex min-h-[100dvh] w-full flex-col items-center px-5 text-center`}>
-      <div className={styles.learningGlyphs} aria-hidden="true">
-        <span>あ</span>
-        <span>AI</span>
-        <span>にほんご</span>
-        <span>50 LESSONS</span>
-        <span>え</span>
-      </div>
-      <div className={styles.openingPanel} data-entered={hasEntered ? "true" : "false"}>
+    <section className={`${styles.uiLayer} ${styles.animePortal} fixed inset-0 z-20 min-h-[100dvh] w-full overflow-hidden text-center`}>
+      <picture className={styles.animeBackdrop} aria-hidden="true">
+        <source media="(max-width: 767px)" srcSet="/assets/ai-world/ai-world-mobile.webp" />
+        <img src="/assets/ai-world/ai-world-desktop.webp" alt="" />
+      </picture>
+
+      <div className={styles.portalShade} aria-hidden="true" />
+
+      <div className={styles.mapTopBar}>
         <div className={styles.topMark}>
           <span className={styles.crest} aria-hidden="true" />
-          <span>JIMMY YAO</span>
+          <span>
+            <strong>JY</strong>
+            <small>AI Learning World</small>
+          </span>
         </div>
+      </div>
 
-        <div className={styles.systemPrompt} data-entered={hasEntered ? "true" : "false"} aria-hidden="true">
-          <span>SYSTEM READY</span>
-          <span>AI Learning World Online</span>
-        </div>
+      <div className={styles.mapHeroCopy}>
+        <p className={styles.mapEyebrow}>AI Learning World</p>
+        <h1>JY 学習タウン</h1>
+        <p>入口を選んで、JYの世界を探索しよう！</p>
+      </div>
 
-        <h1 className={styles.posterTitle} aria-label="AI Learning World">
-          <span data-title-line>AI</span>
-          <span data-title-line>LEARNING</span>
-          <span data-title-line>WORLD</span>
-        </h1>
+      <div
+        ref={characterRef}
+        className={styles.jyCharacter}
+        data-state={characterState}
+        aria-hidden="true"
+      >
+        <span className={styles.jyHair} />
+        <span className={styles.jyHead}>
+          <span />
+          <span />
+        </span>
+        <span className={styles.jyBody}>JY</span>
+        <span className={styles.jyArmLeft} />
+        <span className={styles.jyArmRight} />
+        <span className={styles.jyLegLeft} />
+        <span className={styles.jyLegRight} />
+        <span className={styles.jyShadow} />
+      </div>
 
-        <div className={styles.taglineBlock}>
-          <p data-intro-copy>日本語を学び、AIで未来をつくる。</p>
-          <p data-intro-copy>学习日语，用 AI 打造自己的成长系统。</p>
-        </div>
+      <div className={styles.hotspotLayer} aria-label="Building entrances">
+        {worldPortals.map((portal) => {
+          const isActive = activePortal === portal.key;
+          const style = {
+            "--hotspot-left": portal.desktopHotspot.left,
+            "--hotspot-top": portal.desktopHotspot.top,
+            "--hotspot-width": portal.desktopHotspot.width,
+            "--hotspot-height": portal.desktopHotspot.height,
+            "--hotspot-mobile-left": portal.mobileHotspot.left,
+            "--hotspot-mobile-top": portal.mobileHotspot.top,
+            "--hotspot-mobile-width": portal.mobileHotspot.width,
+            "--hotspot-mobile-height": portal.mobileHotspot.height,
+            "--portal-color": portal.accent
+          } as CSSProperties;
+          const label = `${portal.titleJa} / ${portal.titleZh}`;
 
-        {!hasEntered ? (
-          <button
-            type="button"
-            disabled={isTransitioning}
-            onClick={onEnter}
-            className={`${styles.enterButton} pointer-events-auto disabled:cursor-wait disabled:opacity-70`}
-          >
-            <span>ENTER THE WORLD</span>
-          </button>
-        ) : (
-          <div className={`${styles.menuPanel} pointer-events-auto`}>
-            <div className={styles.menuStack}>
-              <button
-                type="button"
-                disabled={isTransitioning}
-                onClick={onStart}
-                data-menu-button
-                className={`${styles.menuButton} ${styles.menuButtonPrimary} disabled:cursor-wait disabled:opacity-70`}
+          if (portal.status === "live" && portal.href) {
+            return (
+              <a
+                key={portal.key}
+                href={portal.href}
+                aria-label={label}
+                className={styles.portalHotspot}
+                data-active={isActive ? "true" : "false"}
+                style={style}
+                onMouseEnter={() => onPortalHover(portal.key)}
+                onMouseLeave={() => onPortalHover(null)}
+                onFocus={() => onPortalHover(portal.key)}
+                onBlur={() => onPortalHover(null)}
+                onClick={(event) => {
+                  event.preventDefault();
+                  if (!isTransitioning) {
+                    onPortalSelect(portal.key);
+                  }
+                }}
               >
-                <span className={styles.menuIcon} aria-hidden="true">▶</span>
-                <span className={styles.menuCopy}>
-                  <span className={styles.menuTitle}>START</span>
-                  <span className={styles.menuSubtitle}>学习系统を始める</span>
-                </span>
-                <span className={styles.menuArrow} aria-hidden="true">›</span>
-              </button>
-
-              <button
-                type="button"
-                disabled={isTransitioning}
-                onClick={onWorldMap}
-                data-menu-button
-                className={`${styles.menuButton} ${styles.menuButtonMap} disabled:cursor-wait disabled:opacity-70`}
-              >
-                <span className={styles.menuIcon} aria-hidden="true">◇</span>
-                <span className={styles.menuCopy}>
-                  <span className={styles.menuTitle}>WORLD MAP</span>
-                  <span className={styles.menuSubtitle}>探索内容世界</span>
-                </span>
-                <span className={styles.menuArrow} aria-hidden="true">›</span>
-              </button>
-
-              <a href={contactHref} onClick={onContact} data-menu-button className={`${styles.menuButton} ${styles.menuButtonContact}`}>
-                <span className={styles.menuIcon} aria-hidden="true">@</span>
-                <span className={styles.menuCopy}>
-                  <span className={styles.menuTitle}>CONTACT</span>
-                  <span className={styles.menuSubtitle}>联系我</span>
-                </span>
-                <span className={styles.menuArrow} aria-hidden="true">›</span>
+                <span>{portal.titleJa}</span>
               </a>
-            </div>
-          </div>
-        )}
+            );
+          }
+
+          return (
+            <button
+              key={portal.key}
+              type="button"
+              disabled={isTransitioning}
+              aria-label={label}
+              className={styles.portalHotspot}
+              data-active={isActive ? "true" : "false"}
+              style={style}
+              onMouseEnter={() => onPortalHover(portal.key)}
+              onMouseLeave={() => onPortalHover(null)}
+              onFocus={() => onPortalHover(portal.key)}
+              onBlur={() => onPortalHover(null)}
+              onClick={() => onPortalSelect(portal.key)}
+            >
+              <span>{portal.titleJa}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      <div className={styles.mapStatus} aria-live="polite">
+        {statusMessage}
+      </div>
+
+      <nav className={styles.portalDock} aria-label="AI Learning World entrances">
+        {worldPortals.map((portal) => {
+          const isActive = activePortal === portal.key;
+          const isLive = portal.status === "live" && portal.href;
+          const content = (
+            <>
+              <span className={styles.portalDot} style={{ "--portal-color": portal.accent } as CSSProperties} aria-hidden="true" />
+              <span className={styles.portalCopy}>
+                <span className={styles.portalTitle}>{portal.titleJa}</span>
+                <span className={styles.portalSubtitle}>{portal.titleZh} · {portal.description}</span>
+              </span>
+              <span className={styles.portalState}>{isLive ? "进入" : "Soon"}</span>
+            </>
+          );
+
+          return (
+            <button
+              key={portal.key}
+              type="button"
+              disabled={isTransitioning}
+              aria-current={isActive ? "true" : undefined}
+              className={styles.portalCard}
+              data-active={isActive ? "true" : "false"}
+              style={{ "--portal-color": portal.accent } as CSSProperties}
+              onMouseEnter={() => onPortalHover(portal.key)}
+              onMouseLeave={() => onPortalHover(null)}
+              onFocus={() => onPortalHover(portal.key)}
+              onBlur={() => onPortalHover(null)}
+              onClick={() => onPortalSelect(portal.key)}
+            >
+              {content}
+            </button>
+          );
+        })}
+      </nav>
+
+      <div className={styles.seoLinks} aria-label="Public site links">
+        <a href="https://study.jimmyyao.com">日本語学校 / 日语学习系统</a>
+        <a href="https://forum.jimmyyao.com">フォーラム広場 / 论坛系统</a>
       </div>
     </section>
   );

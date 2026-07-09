@@ -181,11 +181,11 @@ export const BlockyDancer = forwardRef<BlockyDancerHandle, BlockyDancerProps>(fu
   return (
     <group ref={rootRef} position={position} scale={scale}>
       <group ref={torsoRef}>
-        <BlockMesh color="#16111f" emissive="#5f3cff" scale={[0.82, 1.04, 0.48]} position={[0, 1.28, 0]} />
+        <BlockMesh color="#f7fbff" emissive="#60a5fa" scale={[0.82, 1.04, 0.48]} position={[0, 1.28, 0]} />
         <mesh material={outlineMaterial} position={[0, 1.28, 0]} scale={[0.9, 1.12, 0.54]}>
           <boxGeometry args={[1, 1, 1]} />
         </mesh>
-        <BlockMesh color="#241438" emissive="#ff3752" scale={[0.9, 0.18, 0.54]} position={[0, 1.74, 0.01]} />
+        <BlockMesh color="#2563eb" emissive="#38bdf8" scale={[0.9, 0.18, 0.54]} position={[0, 1.74, 0.01]} />
         <mesh ref={chestLightRef} position={[0, 1.52, 0.29]} scale={[0.2, 0.2, 0.09]}>
           <boxGeometry args={[1, 1, 1]} />
           <meshStandardMaterial color="#42f2ff" emissive="#42f2ff" emissiveIntensity={0.82} roughness={0.38} />
@@ -195,9 +195,9 @@ export const BlockyDancer = forwardRef<BlockyDancerHandle, BlockyDancerProps>(fu
       </group>
 
       <group ref={headRef} position={[0, 2.05, 0]}>
-        <BlockMesh color="#20162d" emissive="#7c4dff" scale={[0.62, 0.58, 0.58]} />
-        <BlockMesh color="#07060b" scale={[0.68, 0.18, 0.62]} position={[0, 0.36, -0.02]} />
-        <BlockMesh color="#07060b" scale={[0.18, 0.18, 0.18]} position={[-0.26, 0.22, 0.16]} />
+        <BlockMesh color="#f8fbff" emissive="#93c5fd" scale={[0.62, 0.58, 0.58]} />
+        <BlockMesh color="#1f2937" scale={[0.68, 0.18, 0.62]} position={[0, 0.36, -0.02]} />
+        <BlockMesh color="#1f2937" scale={[0.18, 0.18, 0.18]} position={[-0.26, 0.22, 0.16]} />
         <mesh ref={leftEyeRef} position={[-0.15, 0.04, 0.31]} scale={[0.08, 0.055, 0.035]}>
           <boxGeometry args={[1, 1, 1]} />
           <meshStandardMaterial color="#42f2ff" emissive="#42f2ff" emissiveIntensity={0.9} roughness={0.32} />
@@ -209,28 +209,28 @@ export const BlockyDancer = forwardRef<BlockyDancerHandle, BlockyDancerProps>(fu
       </group>
 
       <group ref={scarfRef} position={[0.1, 1.77, 0.03]}>
-        <BlockMesh color="#ff3752" emissive="#ff3752" scale={[0.76, 0.11, 0.16]} />
-        <BlockMesh color="#ff3752" emissive="#ff3752" scale={[0.54, 0.1, 0.12]} position={[0.48, -0.08, -0.08]} />
+        <BlockMesh color="#2563eb" emissive="#38bdf8" scale={[0.76, 0.11, 0.16]} />
+        <BlockMesh color="#2563eb" emissive="#38bdf8" scale={[0.54, 0.1, 0.12]} position={[0.48, -0.08, -0.08]} />
       </group>
 
       <group ref={leftArmRef} position={[-0.62, 1.68, 0]} rotation={[0.08, 0, 0.2]}>
-        <BlockMesh color="#1b1430" emissive="#42f2ff" scale={[0.26, 0.86, 0.26]} position={[0, -0.44, 0]} />
-        <BlockMesh color="#231839" scale={[0.28, 0.24, 0.28]} position={[0, -0.96, 0]} />
+        <BlockMesh color="#eaf6ff" emissive="#38bdf8" scale={[0.26, 0.86, 0.26]} position={[0, -0.44, 0]} />
+        <BlockMesh color="#ffffff" scale={[0.28, 0.24, 0.28]} position={[0, -0.96, 0]} />
       </group>
 
       <group ref={rightArmRef} position={[0.62, 1.68, 0]} rotation={[0.08, 0, -0.2]}>
-        <BlockMesh color="#1b1430" emissive="#42f2ff" scale={[0.26, 0.86, 0.26]} position={[0, -0.44, 0]} />
-        <BlockMesh color="#231839" scale={[0.28, 0.24, 0.28]} position={[0, -0.96, 0]} />
+        <BlockMesh color="#eaf6ff" emissive="#38bdf8" scale={[0.26, 0.86, 0.26]} position={[0, -0.44, 0]} />
+        <BlockMesh color="#ffffff" scale={[0.28, 0.24, 0.28]} position={[0, -0.96, 0]} />
       </group>
 
       <group ref={leftLegRef} position={[-0.26, 0.78, 0]}>
-        <BlockMesh color="#120e1e" emissive="#7c4dff" scale={[0.3, 0.88, 0.32]} position={[0, -0.45, 0]} />
-        <BlockMesh color="#09070f" scale={[0.38, 0.16, 0.5]} position={[0.03, -0.95, 0.1]} />
+        <BlockMesh color="#1d4ed8" emissive="#38bdf8" scale={[0.3, 0.88, 0.32]} position={[0, -0.45, 0]} />
+        <BlockMesh color="#0f172a" scale={[0.38, 0.16, 0.5]} position={[0.03, -0.95, 0.1]} />
       </group>
 
       <group ref={rightLegRef} position={[0.26, 0.78, 0]}>
-        <BlockMesh color="#120e1e" emissive="#7c4dff" scale={[0.3, 0.88, 0.32]} position={[0, -0.45, 0]} />
-        <BlockMesh color="#09070f" scale={[0.38, 0.16, 0.5]} position={[-0.03, -0.95, 0.1]} />
+        <BlockMesh color="#1d4ed8" emissive="#38bdf8" scale={[0.3, 0.88, 0.32]} position={[0, -0.45, 0]} />
+        <BlockMesh color="#0f172a" scale={[0.38, 0.16, 0.5]} position={[-0.03, -0.95, 0.1]} />
       </group>
     </group>
   );
