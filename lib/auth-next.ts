@@ -2,9 +2,7 @@ const allowedHosts = new Set([
   "jimmyyao.com",
   "www.jimmyyao.com",
   "study.jimmyyao.com",
-  "forum.jimmyyao.com",
-  "localhost",
-  "127.0.0.1"
+  "forum.jimmyyao.com"
 ]);
 
 function fallbackOrigin() {
@@ -19,7 +17,7 @@ export function safeNextUrl(value: string | null | undefined, origin = fallbackO
   try {
     const base = new URL(origin);
     const url = new URL(value, base);
-    const isHttp = url.protocol === "https:" || (url.protocol === "http:" && ["localhost", "127.0.0.1"].includes(url.hostname));
+    const isHttp = url.protocol === "https:";
 
     if (!isHttp || !allowedHosts.has(url.hostname)) {
       return origin;
