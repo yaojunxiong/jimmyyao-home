@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { auth } from "@/auth";
 import { getAiWorldPortal, type AiWorldPortalId } from "@/components/ai-world/portals";
+import { createSupabaseRouteClient } from "@/lib/supabase-auth";
 
 const portalIds = new Set<AiWorldPortalId>(["study", "forum", "knowledge", "ai-lab", "admin"]);
 
@@ -28,13 +28,15 @@ export async function GET(
     return NextResponse.redirect(url);
   }
 
-  const session = await auth();
+  const cookieResponse = NextResponse.json({});
+  const supabase = createSupabaseRouteClient(request, cookieResponse);
+  const user = supabase ? (await supabase.auth.getUser()).data.user : null;
 
-  if (!session?.user?.email) {
+  if (!user?.email) {
     const signInUrl = new URL("/login", siteOrigin);
     signInUrl.searchParams.set("next", `${siteOrigin}/entry/${portal.id}`);
-    return NextResponse.redirect(signInUrl);
+    return NextResponse.redirect(signInUrl, { headers: cookieResponse.headers });
   }
 
-  return NextResponse.redirect(portal.url);
+  return NextResponse.redirect(portal.url, { headers: cookieResponse.headers });
 }

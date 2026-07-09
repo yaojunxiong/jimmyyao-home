@@ -1,10 +1,14 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { safeNextUrl } from "@/lib/auth-next";
+import { clearAuthNextCookie, createSupabaseRouteClient } from "@/lib/supabase-auth";
 
-export function GET(request: NextRequest) {
-  const next = safeNextUrl(request.nextUrl.searchParams.get("next"), request.nextUrl.origin);
-  const signOutUrl = new URL("/api/auth/signout", request.nextUrl.origin);
-  signOutUrl.searchParams.set("callbackUrl", next);
+export async function GET(request: NextRequest) {
+  const next = safeNextUrl(request.nextUrl.searchParams.get("next"));
+  const response = NextResponse.redirect(next);
+  const supabase = createSupabaseRouteClient(request, response);
 
-  return NextResponse.redirect(signOutUrl);
+  clearAuthNextCookie(response);
+  await supabase?.auth.signOut();
+
+  return response;
 }
