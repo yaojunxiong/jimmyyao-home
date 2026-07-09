@@ -135,33 +135,71 @@
   backdrop-filter: blur(12px);
 }
 
-.authPill {
-  pointer-events: auto;
+.topControls {
+  pointer-events: none;
   position: absolute;
-  top: max(72px, calc(env(safe-area-inset-top) + 72px));
+  top: max(14px, env(safe-area-inset-top));
   right: clamp(14px, 2.8vw, 34px);
-  display: inline-grid;
-  grid-template-columns: 28px auto;
-  align-items: center;
+  display: grid;
+  justify-items: end;
   gap: 8px;
+}
+
+.controlPill {
+  pointer-events: auto;
+  display: inline-grid;
+  align-items: center;
+  justify-content: center;
+  width: 104px;
   min-height: 40px;
-  padding: 6px 12px 6px 7px;
+  padding: 6px 12px;
   border: 1px solid rgba(255, 255, 255, 0.72);
   border-radius: 999px;
   color: #ffffff;
-  background: linear-gradient(135deg, rgba(20, 64, 112, 0.82), rgba(9, 121, 146, 0.66));
+  background:
+    linear-gradient(135deg, rgba(20, 64, 112, 0.84), rgba(9, 121, 146, 0.64)),
+    rgba(9, 51, 92, 0.62);
   box-shadow:
     0 14px 28px rgba(24, 86, 139, 0.18),
     inset 0 1px 0 rgba(255, 255, 255, 0.28);
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 950;
   letter-spacing: 0;
   backdrop-filter: blur(12px);
+  transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease, background 160ms ease;
+}
+
+.controlPill:hover,
+.controlPill:focus-visible,
+.languagePill:focus-within {
+  border-color: rgba(255, 255, 255, 0.92);
+  box-shadow:
+    0 16px 30px rgba(20, 78, 130, 0.22),
+    0 0 0 3px rgba(255, 255, 255, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.34);
+  outline: none;
+}
+
+.controlPill:active {
+  transform: translateY(1px);
+}
+
+.soundPill[aria-pressed="true"] {
+  background:
+    linear-gradient(135deg, rgba(26, 83, 133, 0.9), rgba(31, 145, 167, 0.68)),
+    rgba(9, 51, 92, 0.66);
+}
+
+.authPill {
+  grid-template-columns: 26px 1fr;
+  justify-content: start;
+  gap: 7px;
+  padding: 6px 11px 6px 7px;
 }
 
 .authPill span {
   display: grid;
-  width: 28px;
+  width: 26px;
   aspect-ratio: 1;
   place-items: center;
   border-radius: 50%;
@@ -171,30 +209,35 @@
 }
 
 .authPill strong {
+  min-width: 0;
+  overflow: hidden;
+  text-align: left;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .languagePill {
   pointer-events: auto;
-  position: absolute;
-  top: max(124px, calc(env(safe-area-inset-top) + 124px));
-  right: clamp(14px, 2.8vw, 34px);
   display: inline-grid;
-  grid-template-columns: repeat(3, minmax(34px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 4px;
+  width: 104px;
   min-height: 38px;
   padding: 5px;
   border: 1px solid rgba(255, 255, 255, 0.72);
   border-radius: 999px;
-  background: linear-gradient(135deg, rgba(20, 64, 112, 0.76), rgba(9, 121, 146, 0.58));
+  background:
+    linear-gradient(135deg, rgba(20, 64, 112, 0.76), rgba(9, 121, 146, 0.58)),
+    rgba(9, 51, 92, 0.58);
   box-shadow:
     0 14px 28px rgba(24, 86, 139, 0.16),
     inset 0 1px 0 rgba(255, 255, 255, 0.28);
   backdrop-filter: blur(12px);
+  transition: border-color 160ms ease, box-shadow 160ms ease;
 }
 
 .languagePill button {
-  min-width: 34px;
+  min-width: 0;
   min-height: 28px;
   border: 0;
   border-radius: 999px;
@@ -241,24 +284,40 @@
     font-size: 0.78rem;
   }
 
-  .authPill {
-    top: max(70px, calc(env(safe-area-inset-top) + 68px));
+  .topControls {
+    top: max(10px, env(safe-area-inset-top));
     right: 12px;
+    gap: 7px;
+  }
+
+  .controlPill,
+  .languagePill {
+    width: 96px;
+  }
+
+  .controlPill {
     min-height: 36px;
-    padding-right: 10px;
+    padding: 5px 10px;
     font-size: 0.66rem;
   }
 
+  .authPill {
+    grid-template-columns: 24px 1fr;
+    gap: 6px;
+    padding: 5px 9px 5px 6px;
+  }
+
+  .authPill span {
+    width: 24px;
+  }
+
   .languagePill {
-    top: max(116px, calc(env(safe-area-inset-top) + 112px));
-    right: 12px;
-    grid-template-columns: repeat(3, 30px);
     min-height: 34px;
     padding: 4px;
   }
 
   .languagePill button {
-    min-width: 30px;
+    min-width: 0;
     min-height: 26px;
     font-size: 0.62rem;
   }

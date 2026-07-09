@@ -2,7 +2,6 @@
 
 import gsap from "gsap";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { AudioController } from "@/components/anime-gate/AudioController";
 import { TransitionOverlay } from "@/components/anime-gate/TransitionOverlay";
 import { AiWorldCanvas, type AiWorldCanvasHandle } from "./AiWorldCanvas";
 import { AiWorldOverlay } from "./AiWorldOverlay";
@@ -200,16 +199,14 @@ export function AiWorldHero() {
         userInitial={characterProfile.initial}
         userEmail={characterProfile.email}
         language={language}
+        soundEnabled={soundEnabled}
+        soundLabels={{ on: copy.soundOn, off: copy.soundOff }}
         onLanguageChange={handleLanguageChange}
+        onSoundToggle={handleSoundToggle}
         onSignIn={handleSignIn}
         onSignOut={handleSignOut}
       />
-      <AudioController
-        audioRef={audioRef}
-        soundEnabled={soundEnabled}
-        onToggle={handleSoundToggle}
-        labels={{ on: copy.soundOn, off: copy.soundOff }}
-      />
+      <audio ref={audioRef} src="/audio/opening-theme.mp3" loop preload="auto" playsInline />
       <TransitionOverlay ref={transitionOverlayRef} />
     </main>
   );

@@ -8,7 +8,13 @@ type AiWorldOverlayProps = {
   userInitial: string;
   userEmail: string | null;
   language: AiWorldLanguage;
+  soundEnabled: boolean;
+  soundLabels: {
+    on: string;
+    off: string;
+  };
   onLanguageChange: (language: AiWorldLanguage) => void;
+  onSoundToggle: () => void;
   onSignIn: () => void;
   onSignOut: () => void;
 };
@@ -18,7 +24,10 @@ export function AiWorldOverlay({
   userInitial,
   userEmail,
   language,
+  soundEnabled,
+  soundLabels,
   onLanguageChange,
+  onSoundToggle,
   onSignIn,
   onSignOut
 }: AiWorldOverlayProps) {
@@ -34,32 +43,43 @@ export function AiWorldOverlay({
         </span>
       </div>
 
-      <div className={styles.languagePill} aria-label={copy.languageLabel}>
-        {aiWorldLanguages.map((item) => (
-          <button
-            key={item.code}
-            type="button"
-            aria-pressed={language === item.code}
-            title={item.label}
-            onClick={() => onLanguageChange(item.code)}
-          >
-            {item.shortLabel}
-          </button>
-        ))}
+      <div className={styles.topControls}>
+        <button
+          className={`${styles.controlPill} ${styles.soundPill}`}
+          type="button"
+          aria-pressed={soundEnabled}
+          onClick={onSoundToggle}
+        >
+          {soundEnabled ? soundLabels.on : soundLabels.off}
+        </button>
+
+        <button
+          className={`${styles.controlPill} ${styles.authPill}`}
+          type="button"
+          onClick={userEmail ? onSignOut : onSignIn}
+        >
+          <span>{userEmail ? userInitial : "?"}</span>
+          <strong>{userEmail ? copy.authSignOut : copy.authSignIn}</strong>
+        </button>
+
+        <div className={styles.languagePill} aria-label={copy.languageLabel}>
+          {aiWorldLanguages.map((item) => (
+            <button
+              key={item.code}
+              type="button"
+              aria-pressed={language === item.code}
+              title={item.label}
+              onClick={() => onLanguageChange(item.code)}
+            >
+              {item.shortLabel}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className={styles.bottomPrompt} aria-live="polite">
         {statusMessage}
       </div>
-
-      <button
-        className={styles.authPill}
-        type="button"
-        onClick={userEmail ? onSignOut : onSignIn}
-      >
-        <span>{userEmail ? userInitial : "?"}</span>
-        <strong>{userEmail ? copy.authSignOut : copy.authSignIn}</strong>
-      </button>
 
       <div className={styles.seoLinks} aria-label="Public site links">
         <a href="/entry/study">{copy.seoStudy}</a>
