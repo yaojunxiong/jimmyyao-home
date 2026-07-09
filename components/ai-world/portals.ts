@@ -103,7 +103,7 @@ export const aiWorldPortals: AiWorldPortal[] = [
     descriptionJa: "設定・データ・承認",
     descriptionZh: "设置・数据・审核",
     descriptionEn: "Settings, data, and approvals",
-    url: "https://study.jimmyyao.com/admin/system",
+    url: "https://admin.jimmyyao.com",
     enabled: true,
     position: [2.1, 0.25, 2.42],
     entrancePosition: [1.62, 0.42, 1.86],

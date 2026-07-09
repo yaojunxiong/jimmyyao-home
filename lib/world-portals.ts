@@ -110,7 +110,7 @@ export const worldPortals: WorldPortal[] = [
     subtitleJa: "管理システム",
     description: "設定・データ・承認",
     status: "live",
-    href: "https://study.jimmyyao.com/admin/system",
+    href: "https://admin.jimmyyao.com",
     accent: "#ef4444",
     buildingColor: "#e2d0b4",
     roofColor: "#4a5568",
