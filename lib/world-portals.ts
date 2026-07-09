@@ -75,7 +75,7 @@ export const worldPortals: WorldPortal[] = [
     subtitleJa: "知識ベース",
     description: "資料・ガイド・文書",
     status: "live",
-    href: "https://hub.jimmyyao.com",
+    href: "https://knowledge.jimmyyao.com",
     accent: "#d97706",
     buildingColor: "#e8d3aa",
     roofColor: "#3b638a",

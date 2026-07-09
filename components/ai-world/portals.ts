@@ -67,7 +67,7 @@ export const aiWorldPortals: AiWorldPortal[] = [
     descriptionJa: "資料・ガイド・文書",
     descriptionZh: "资料・指南・文档",
     descriptionEn: "Resources, guides, and docs",
-    url: "https://hub.jimmyyao.com",
+    url: "https://knowledge.jimmyyao.com",
     enabled: true,
     position: [1.45, 0.25, -2.62],
     entrancePosition: [1.12, 0.42, -1.92],
