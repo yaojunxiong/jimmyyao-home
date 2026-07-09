@@ -26,7 +26,9 @@ export const aiWorldCopy = {
     enter: "入る",
     soon: "準備中",
     seoStudy: "日本語学校 / 日语学习系统 / Japanese Learning",
-    seoForum: "フォーラム広場 / 论坛系统 / Forum"
+    seoForum: "フォーラム広場 / 论坛系统 / Forum",
+    seoKnowledge: "知識の図書館 / 知识库 / Knowledge Library",
+    seoAdmin: "管理センター / 管理后台 / Admin Center"
   },
   zh: {
     defaultStatus: "用 WASD / 方向键 / 点击地面，让 JY 在小世界里跑起来",
@@ -43,7 +45,9 @@ export const aiWorldCopy = {
     enter: "进入",
     soon: "即将开放",
     seoStudy: "日本語学校 / 日语学习系统 / Japanese Learning",
-    seoForum: "フォーラム広場 / 论坛系统 / Forum"
+    seoForum: "フォーラム広場 / 论坛系统 / Forum",
+    seoKnowledge: "知識の図書館 / 知识库 / Knowledge Library",
+    seoAdmin: "管理センター / 管理后台 / Admin Center"
   },
   en: {
     defaultStatus: "Use WASD / arrow keys / tap the ground to move JY",
@@ -60,7 +64,9 @@ export const aiWorldCopy = {
     enter: "ENTER",
     soon: "COMING SOON",
     seoStudy: "日本語学校 / 日语学习系统 / Japanese Learning",
-    seoForum: "フォーラム広場 / 论坛系统 / Forum"
+    seoForum: "フォーラム広場 / 论坛系统 / Forum",
+    seoKnowledge: "知識の図書館 / 知识库 / Knowledge Library",
+    seoAdmin: "管理センター / 管理后台 / Admin Center"
   }
 } satisfies Record<AiWorldLanguage, {
   defaultStatus: string;
@@ -78,6 +84,8 @@ export const aiWorldCopy = {
   soon: string;
   seoStudy: string;
   seoForum: string;
+  seoKnowledge: string;
+  seoAdmin: string;
 }>;
 
 export function detectAiWorldLanguage(): AiWorldLanguage {

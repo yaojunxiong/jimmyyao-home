@@ -64,6 +64,8 @@ export function AiWorldOverlay({
       <div className={styles.seoLinks} aria-label="Public site links">
         <a href="/entry/study">{copy.seoStudy}</a>
         <a href="/entry/forum">{copy.seoForum}</a>
+        <a href="/entry/knowledge">{copy.seoKnowledge}</a>
+        <a href="/entry/admin">{copy.seoAdmin}</a>
       </div>
     </section>
   );

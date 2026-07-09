@@ -320,7 +320,13 @@ export function PortalBuilding({
   const portalGlowRef = useRef<THREE.Mesh>(null);
   const isLit = active || hovered;
   const signLabel = portalTitle(portal, language);
-  const signFontSize = signLabel.length > 13 ? 0.105 : signLabel.length > 7 ? 0.135 : 0.195;
+  const signFontSize = language === "zh"
+    ? signLabel.length > 6 ? 0.118 : 0.132
+    : language === "en"
+      ? signLabel.length > 12 ? 0.092 : 0.108
+      : signLabel.length > 7 ? 0.135 : 0.19;
+  const signWidth = language === "en" ? 1.72 : language === "zh" ? 1.48 : 1.52;
+  const signMaxWidth = language === "en" ? 1.56 : language === "zh" ? 1.34 : 1.42;
   const copy = aiWorldCopy[language];
 
   useFrame(({ clock }, delta) => {
@@ -426,15 +432,15 @@ export function PortalBuilding({
       </mesh>
       <Billboard position={[0, 1.47, 0.58]}>
         <group ref={signRef}>
-          <mesh scale={[1.52, 0.34, 0.045]}>
+          <mesh scale={[signWidth, 0.34, 0.045]}>
             <boxGeometry args={[1, 1, 1]} />
             <meshToonMaterial color="#fff1c8" emissive={portal.color} emissiveIntensity={isLit ? 0.24 : 0.07} />
           </mesh>
-          <mesh position={[0, -0.23, 0.005]} scale={[1.3, 0.045, 0.035]}>
+          <mesh position={[0, -0.23, 0.005]} scale={[signWidth * 0.86, 0.045, 0.035]}>
             <boxGeometry args={[1, 1, 1]} />
             <meshBasicMaterial color={portal.color} transparent opacity={isLit ? 0.82 : 0.45} />
           </mesh>
-          <Text position={[0, 0.018, 0.052]} fontSize={signFontSize} anchorX="center" anchorY="middle" color="#2f2418" maxWidth={1.42}>
+          <Text position={[0, 0.018, 0.052]} fontSize={signFontSize} anchorX="center" anchorY="middle" color="#2f2418" maxWidth={signMaxWidth}>
             {signLabel}
           </Text>
         </group>
