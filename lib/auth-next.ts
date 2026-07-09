@@ -2,7 +2,9 @@ const allowedHosts = new Set([
   "jimmyyao.com",
   "www.jimmyyao.com",
   "study.jimmyyao.com",
-  "forum.jimmyyao.com"
+  "forum.jimmyyao.com",
+  "admin.jimmyyao.com",
+  "knowledge.jimmyyao.com"
 ]);
 
 function fallbackOrigin() {
