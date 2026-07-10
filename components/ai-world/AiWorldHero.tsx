@@ -135,6 +135,23 @@ export function AiWorldHero() {
   }, []);
 
   useEffect(() => {
+    const hashParams = new URLSearchParams(window.location.hash.slice(1));
+    const searchParams = new URLSearchParams(window.location.search);
+    const isRecoverySession =
+      hashParams.get("type") === "recovery" &&
+      Boolean(hashParams.get("access_token")) &&
+      Boolean(hashParams.get("refresh_token"));
+
+    if (isRecoverySession) {
+      window.location.replace(`/reset-password${window.location.hash}`);
+      return;
+    }
+
+    if (searchParams.get("error_code") === "otp_expired") {
+      window.location.replace(`/reset-password${window.location.search}`);
+      return;
+    }
+
     gsap.set(transitionOverlayRef.current, { autoAlpha: 0 });
     if (audioRef.current) {
       audioRef.current.volume = 0.3;
