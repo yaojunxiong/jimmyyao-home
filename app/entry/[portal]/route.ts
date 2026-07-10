@@ -3,6 +3,7 @@ import { getAiWorldPortal, type AiWorldPortalId } from "@/components/ai-world/po
 import { createSupabaseRouteClient } from "@/lib/supabase-auth";
 
 const portalIds = new Set<AiWorldPortalId>(["study", "forum", "knowledge", "ai-lab", "admin"]);
+const publicPortalIds = new Set<AiWorldPortalId>(["study", "forum", "knowledge"]);
 
 function getSiteOrigin(request: NextRequest) {
   return process.env.AUTH_URL || request.nextUrl.origin;
@@ -26,6 +27,10 @@ export async function GET(
     url.searchParams.set("entry", rawPortalId);
     url.searchParams.set("status", "coming-soon");
     return NextResponse.redirect(url);
+  }
+
+  if (publicPortalIds.has(portal.id)) {
+    return NextResponse.redirect(portal.url);
   }
 
   const cookieResponse = NextResponse.json({});
