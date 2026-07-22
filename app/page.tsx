@@ -1,5 +1,5 @@
-import { AnimeGate } from "@/components/anime-gate/AnimeGate";
+import { PortalHome } from "@/components/home/PortalHome";
 
-export default function Home() {
-  return <AnimeGate />;
+export default function HomePage() {
+  return <PortalHome />;
 }
