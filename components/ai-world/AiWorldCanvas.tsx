@@ -178,8 +178,10 @@ function SceneContent({
     if (worldRef.current && !isTransitioning) {
       const targetScale = sceneRefs.current.isDesktop ? 1.02 : 0.84;
       worldRef.current.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.06);
-      worldRef.current.rotation.y = pointer.x * 0.055;
-      worldRef.current.rotation.x = -pointer.y * 0.018;
+      if (!lowPerformance) {
+        worldRef.current.rotation.y = pointer.x * 0.055;
+        worldRef.current.rotation.x = -pointer.y * 0.018;
+      }
     }
 
     if (character?.root) {
@@ -222,18 +224,21 @@ function SceneContent({
         }
 
         const stride = Math.sin(time * 10.8);
+        const idleScale = isFreeMoving || !lowPerformance ? 1 : 0;
         character.setRunning(isFreeMoving);
-        root.position.y = isFreeMoving ? 0.42 + Math.abs(stride) * 0.06 : 0.42 + Math.sin(time * 2.2) * 0.045;
+        root.position.y = isFreeMoving
+          ? 0.42 + Math.abs(stride) * 0.06
+          : 0.42 + (lowPerformance ? 0 : Math.sin(time * 2.2) * 0.045);
         root.scale.setScalar(root.scale.x + ((sceneRefs.current.isDesktop ? 0.68 : 0.62) - root.scale.x) * 0.08);
         root.rotation.y += (facing - root.rotation.y) * (isFreeMoving ? 0.16 : 0.05);
         root.rotation.x += ((isFreeMoving ? -0.13 : 0) - root.rotation.x) * 0.12;
-        root.rotation.z = isFreeMoving ? Math.sin(time * 10.8) * 0.04 : Math.sin(time * 1.8) * 0.018;
+        root.rotation.z = isFreeMoving ? Math.sin(time * 10.8) * 0.04 : Math.sin(time * 1.8) * 0.018 * idleScale;
 
         if (character.leftArm && character.rightArm && character.leftLeg && character.rightLeg) {
-          character.leftArm.rotation.x = stride * (isFreeMoving ? 0.9 : 0.2);
-          character.rightArm.rotation.x = -stride * (isFreeMoving ? 0.9 : 0.2);
-          character.leftLeg.rotation.x = -stride * (isFreeMoving ? 0.72 : 0.08);
-          character.rightLeg.rotation.x = stride * (isFreeMoving ? 0.72 : 0.08);
+          character.leftArm.rotation.x = stride * (isFreeMoving ? 0.9 : 0.2 * idleScale);
+          character.rightArm.rotation.x = -stride * (isFreeMoving ? 0.9 : 0.2 * idleScale);
+          character.leftLeg.rotation.x = -stride * (isFreeMoving ? 0.72 : 0.08 * idleScale);
+          character.rightLeg.rotation.x = stride * (isFreeMoving ? 0.72 : 0.08 * idleScale);
         }
       } else if (character.leftArm && character.rightArm && character.leftLeg && character.rightLeg) {
         character.setRunning(true);
@@ -299,6 +304,8 @@ export const AiWorldCanvas = forwardRef<AiWorldCanvasHandle, AiWorldCanvasProps>
   const [webglSupported, setWebglSupported] = useState<boolean | null>(null);
   const isDesktop = useDesktopLayout();
   const lowPerformance = useLowPerformanceMode();
+  const stageRef = useRef<HTMLDivElement>(null);
+  const [inView, setInView] = useState(true);
   const sceneRefs = useRef<SceneRefs>({
     camera: null,
     lookAt: new THREE.Vector3(0, 0.52, -0.25),
@@ -309,6 +316,17 @@ export const AiWorldCanvas = forwardRef<AiWorldCanvasHandle, AiWorldCanvasProps>
 
   useEffect(() => {
     setWebglSupported(hasWebGL());
+  }, []);
+
+  useEffect(() => {
+    const element = stageRef.current;
+    if (!element || typeof IntersectionObserver === "undefined") return;
+    const observer = new IntersectionObserver(
+      (entries) => setInView(entries[0]?.isIntersecting ?? true),
+      { threshold: 0.01 }
+    );
+    observer.observe(element);
+    return () => observer.disconnect();
   }, []);
 
   useEffect(() => {
@@ -418,9 +436,10 @@ export const AiWorldCanvas = forwardRef<AiWorldCanvasHandle, AiWorldCanvasProps>
   }
 
   return (
-    <div className={styles.canvasStage} aria-hidden="true">
+    <div ref={stageRef} className={styles.canvasStage} aria-hidden="true">
       {webglSupported && (
         <Canvas
+          frameloop={inView ? "always" : "never"}
           dpr={[1, lowPerformance ? 1.25 : 1.8]}
           camera={{ position: cameraPreset(isDesktop).position, fov: cameraPreset(isDesktop).fov, near: 0.1, far: 42 }}
           gl={{ antialias: !lowPerformance, alpha: false, powerPreference: "high-performance" }}
