@@ -137,6 +137,11 @@ export function AiWorldHero({ language, onLanguageChange }: AiWorldHeroProps) {
         onPortalSelect={handlePortalSelect}
       />
 
+      <div className={styles.worldAtmosphere} aria-hidden="true">
+        <span />
+        <span />
+        <span />
+      </div>
       <div className={styles.heroScrim} aria-hidden="true" />
       <div className={styles.canvasTint} aria-hidden="true" />
 
@@ -145,8 +150,10 @@ export function AiWorldHero({ language, onLanguageChange }: AiWorldHeroProps) {
         <span className={styles.brandAvatar} aria-hidden="true">
           JY
         </span>
-        <strong>{heroCopy.heroName}</strong>
-        <small>jimmyyao.com</small>
+        <span className={styles.brandMeta}>
+          <strong>{heroCopy.heroName}</strong>
+          <small>AI learning builder</small>
+        </span>
       </div>
 
       {/* Top-right controls — full-viewport positioned */}
@@ -188,6 +195,10 @@ export function AiWorldHero({ language, onLanguageChange }: AiWorldHeroProps) {
       {/* Left column text content */}
       <div className={styles.overlayRoot}>
         <div className={styles.heroContent}>
+          <p className={styles.heroEyebrow} style={{ animationDelay: "0.22s" }}>
+            <span aria-hidden="true" />
+            AI Learning World
+          </p>
           <h1 className={styles.heroTitle} style={{ animationDelay: "0.3s" }}>
             {heroCopy.heroName}
           </h1>
@@ -208,7 +219,7 @@ export function AiWorldHero({ language, onLanguageChange }: AiWorldHeroProps) {
               {heroCopy.ctaStudy}
             </a>
             <a
-              className={`${styles.ctaButton} ${styles.ctaPrimary}`}
+              className={`${styles.ctaButton} ${styles.ctaSecondary}`}
               href="https://ai.jimmyyao.com"
               target="_blank"
               rel="noopener noreferrer"
@@ -220,6 +231,10 @@ export function AiWorldHero({ language, onLanguageChange }: AiWorldHeroProps) {
             </a>
           </div>
         </div>
+      </div>
+
+      <div className={styles.sectionBridge} aria-hidden="true">
+        <span />
       </div>
 
       {/* Scroll cue — full-viewport centered */}
@@ -248,14 +263,6 @@ export function AiWorldHero({ language, onLanguageChange }: AiWorldHeroProps) {
     </section>
   );
 }
-
-const characterProfile = {
-  skinTone: "#f4c9a3",
-  hairColor: "#2b2230",
-  shirtColor: "#6fd0ff",
-  pantsColor: "#27406b",
-  accentColor: "#ffd58a"
-};
 
 type SoundToggleProps = {
   enabled: boolean;

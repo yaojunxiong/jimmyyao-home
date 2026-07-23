@@ -21,13 +21,14 @@ export function SpacesSection({ content }: SpacesSectionProps) {
   const headerReveal = useReveal<HTMLDivElement>({ threshold: 0.1 });
 
   return (
-    <section id="spaces" className="relative bg-deep-gradient py-24 md:py-32 lg:py-40 overflow-hidden">
+    <section id="spaces" className="relative bg-deep-gradient py-20 md:py-24 lg:py-28 overflow-hidden">
+      <div className="absolute inset-x-0 top-0 h-36 bg-[radial-gradient(ellipse_at_top,rgba(99,102,241,.14),transparent_68%)] pointer-events-none" />
       <div className="absolute inset-0 bg-dot-grid pointer-events-none" />
       <div className="aurora-glow aurora-glow-purple" />
       <div className="aurora-glow aurora-glow-blue" />
 
       <div className="section-container relative z-10">
-        <header ref={headerReveal.ref} className="mb-16 md:mb-24 text-center"
+        <header ref={headerReveal.ref} className="mb-12 md:mb-16 text-center"
           style={headerReveal.isVisible ? revealStyles.visible : revealStyles.hidden}>
           <p className="text-[11px] font-semibold tracking-[0.2em] uppercase text-indigo-400 mb-5">Core Spaces</p>
           <h2 className="text-[32px] md:text-[40px] lg:text-[48px] font-semibold tracking-[-0.02em] text-white/95 mb-4">
