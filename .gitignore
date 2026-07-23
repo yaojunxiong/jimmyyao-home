@@ -25,3 +25,9 @@ pnpm-debug.log*
 
 # typescript build info
 *.tsbuildinfo
+
+# playwright-cli automation artifacts
+.playwright-cli/
+
+# production audit screenshots (saved externally)
+public/screenshots/prod-*.png
