@@ -138,56 +138,67 @@ export function AiWorldHero({ language, onLanguageChange }: AiWorldHeroProps) {
       />
 
       <div className={styles.heroScrim} aria-hidden="true" />
+      <div className={styles.canvasTint} aria-hidden="true" />
 
-      <div className={styles.overlayRoot}>
-        <div className={styles.brandPill}>
-          <span className={styles.brandAvatar} aria-hidden="true">
-            JY
+      {/* Brand monogram — full-viewport positioned */}
+      <div className={styles.brandPill} style={{ animationDelay: "0.15s" }}>
+        <span className={styles.brandAvatar} aria-hidden="true">
+          JY
+        </span>
+        <strong>{heroCopy.heroName}</strong>
+        <small>jimmyyao.com</small>
+      </div>
+
+      {/* Top-right controls — full-viewport positioned */}
+      <div className={styles.topControls} style={{ animationDelay: "0.15s" }}>
+        <SoundToggle
+          enabled={soundEnabled}
+          onToggle={() => setSoundEnabled((value) => !value)}
+          copy={copy}
+        />
+        {user ? (
+          <span className={`${styles.controlPill} ${styles.authPill}`}>
+            <span aria-hidden="true">JY</span>
+            <strong>JY</strong>
           </span>
-          <strong>{heroCopy.heroName}</strong>
-          <small>jimmyyao.com</small>
+        ) : (
+          <a className={styles.controlPill} href="/login">
+            {copy.authSignIn}
+          </a>
+        )}
+        <div className={styles.languagePill} role="group" aria-label={copy.languageLabel}>
+          {(["ja", "zh", "en"] as AiWorldLanguage[]).map((code) => (
+            <button
+              key={code}
+              type="button"
+              aria-pressed={language === code}
+              onClick={() => handleLanguageChange(code)}
+            >
+              {code.toUpperCase()}
+            </button>
+          ))}
         </div>
+      </div>
 
-        <div className={styles.topControls}>
-          <SoundToggle
-            enabled={soundEnabled}
-            onToggle={() => setSoundEnabled((value) => !value)}
-            copy={copy}
-          />
-          {user ? (
-            <span className={`${styles.controlPill} ${styles.authPill}`}>
-              <span aria-hidden="true">JY</span>
-              <strong>JY</strong>
-            </span>
-          ) : (
-            <a className={styles.controlPill} href="/login">
-              {copy.authSignIn}
-            </a>
-          )}
-          <div className={styles.languagePill} role="group" aria-label={copy.languageLabel}>
-            {(["ja", "zh", "en"] as AiWorldLanguage[]).map((code) => (
-              <button
-                key={code}
-                type="button"
-                aria-pressed={language === code}
-                onClick={() => handleLanguageChange(code)}
-              >
-                {code.toUpperCase()}
-              </button>
-            ))}
-          </div>
-        </div>
+      {/* Status line — full-viewport positioned */}
+      <p className={styles.statusLine} role="status" aria-live="polite">
+        {statusMessage || copy.defaultStatus}
+      </p>
 
-        <p className={styles.statusLine} role="status" aria-live="polite">
-          {statusMessage || copy.defaultStatus}
-        </p>
-
+      {/* Left column text content */}
+      <div className={styles.overlayRoot}>
         <div className={styles.heroContent}>
-          <h1 className={styles.heroTitle}>{heroCopy.heroName}</h1>
-          <p className={styles.heroSubtitle}>{heroCopy.heroSubtitle}</p>
-          <p className={styles.heroIntro}>{heroCopy.heroIntro}</p>
+          <h1 className={styles.heroTitle} style={{ animationDelay: "0.3s" }}>
+            {heroCopy.heroName}
+          </h1>
+          <p className={styles.heroSubtitle} style={{ animationDelay: "0.5s" }}>
+            {heroCopy.heroSubtitle}
+          </p>
+          <p className={styles.heroIntro} style={{ animationDelay: "0.7s" }}>
+            {heroCopy.heroIntro}
+          </p>
 
-          <div className={styles.heroCtas}>
+          <div className={styles.heroCtas} style={{ animationDelay: "0.9s" }}>
             <a
               className={`${styles.ctaButton} ${styles.ctaPrimary}`}
               href="https://study.jimmyyao.com"
@@ -208,23 +219,30 @@ export function AiWorldHero({ language, onLanguageChange }: AiWorldHeroProps) {
               {heroCopy.ctaGrowth}
             </a>
           </div>
-
-          <a className={styles.scrollCue} href="#spaces" aria-label={heroCopy.scrollCue}>
-            <span>{heroCopy.scrollCue}</span>
-            <span className={styles.scrollCueArrow} aria-hidden="true">
-              ↓
-            </span>
-          </a>
         </div>
-
-        <nav className={styles.seoLinks} aria-label="Systems">
-          {SOCIAL_LINKS.map((link) => (
-            <a key={link.href} href={link.href}>
-              {copy[link.labelKey]}
-            </a>
-          ))}
-        </nav>
       </div>
+
+      {/* Scroll cue — full-viewport centered */}
+      <a
+        className={styles.scrollCue}
+        href="#spaces"
+        aria-label={heroCopy.scrollCue}
+        style={{ animationDelay: "1.4s" }}
+      >
+        <span>{heroCopy.scrollCue}</span>
+        <span className={styles.scrollCueArrow} aria-hidden="true">
+          ↓
+        </span>
+      </a>
+
+      {/* SEO links — bottom-right of full viewport */}
+      <nav className={styles.seoLinks} aria-label="Systems">
+        {SOCIAL_LINKS.map((link) => (
+          <a key={link.href} href={link.href}>
+            {copy[link.labelKey]}
+          </a>
+        ))}
+      </nav>
 
       <TransitionOverlay active={isTransitioning} reducedMotion={reducedMotion} />
     </section>
