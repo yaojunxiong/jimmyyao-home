@@ -176,3 +176,72 @@ body {
   animation: float-up linear infinite;
   z-index: 0;
 }
+
+/* --- Human × AI story scene --- */
+.human-ai-scene {
+  isolation: isolate;
+}
+
+.human-ai-scene::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 9;
+  pointer-events: none;
+  border-radius: inherit;
+  background:
+    linear-gradient(115deg, rgba(255, 255, 255, 0.045), transparent 24%, transparent 72%, rgba(129, 140, 248, 0.045)),
+    linear-gradient(to bottom, transparent 68%, rgba(5, 5, 19, 0.38));
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.045);
+}
+
+.about-scene-grid {
+  transform: perspective(420px) rotateX(64deg) scale(1.25);
+  transform-origin: bottom center;
+  background-image:
+    linear-gradient(rgba(103, 232, 249, 0.13) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(129, 140, 248, 0.12) 1px, transparent 1px);
+  background-size: 34px 34px;
+  -webkit-mask-image: linear-gradient(to top, #000, transparent 90%);
+  mask-image: linear-gradient(to top, #000, transparent 90%);
+}
+
+.about-hologram-float {
+  animation: about-float 5.2s ease-in-out infinite;
+}
+
+.about-buddy-float {
+  animation: about-float 4.6s 0.4s ease-in-out infinite;
+}
+
+.about-data-flow {
+  animation: about-data-flow 2.2s linear infinite;
+}
+
+.about-orbit-line {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: about-orbit 18s linear infinite;
+}
+
+@keyframes about-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes about-data-flow {
+  to { stroke-dashoffset: -36; }
+}
+
+@keyframes about-orbit {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .about-hologram-float,
+  .about-buddy-float,
+  .about-data-flow,
+  .about-orbit-line {
+    animation: none;
+  }
+}

@@ -432,15 +432,19 @@ export function PortalBuilding({
       </mesh>
       <Billboard position={[0, 1.47, 0.58]}>
         <group ref={signRef}>
+          <mesh position={[0, 0, -0.035]} scale={[signWidth * 1.08, 0.42, 0.025]}>
+            <boxGeometry args={[1, 1, 1]} />
+            <meshBasicMaterial color={portal.color} transparent opacity={isLit ? 0.26 : 0.14} />
+          </mesh>
           <mesh scale={[signWidth, 0.34, 0.045]}>
             <boxGeometry args={[1, 1, 1]} />
-            <meshToonMaterial color="#fff1c8" emissive={portal.color} emissiveIntensity={isLit ? 0.24 : 0.07} />
+            <meshToonMaterial color="#141a38" emissive={portal.color} emissiveIntensity={isLit ? 0.34 : 0.14} />
           </mesh>
           <mesh position={[0, -0.23, 0.005]} scale={[signWidth * 0.86, 0.045, 0.035]}>
             <boxGeometry args={[1, 1, 1]} />
             <meshBasicMaterial color={portal.color} transparent opacity={isLit ? 0.82 : 0.45} />
           </mesh>
-          <Text position={[0, 0.018, 0.052]} fontSize={signFontSize} anchorX="center" anchorY="middle" color="#2f2418" maxWidth={signMaxWidth}>
+          <Text position={[0, 0.018, 0.052]} fontSize={signFontSize} anchorX="center" anchorY="middle" color="#f8fafc" maxWidth={signMaxWidth}>
             {signLabel}
           </Text>
         </group>

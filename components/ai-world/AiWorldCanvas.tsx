@@ -1,6 +1,7 @@
 "use client";
 
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { Sparkles } from "@react-three/drei";
 import gsap from "gsap";
 import { forwardRef, Suspense, useEffect, useImperativeHandle, useRef, useState } from "react";
 import type { MutableRefObject } from "react";
@@ -72,7 +73,7 @@ function useDesktopLayout() {
   const [isDesktop, setIsDesktop] = useState(false);
 
   useEffect(() => {
-    const query = window.matchMedia("(min-width: 768px)");
+    const query = window.matchMedia("(min-width: 1025px)");
     const update = () => setIsDesktop(query.matches);
     update();
     query.addEventListener("change", update);
@@ -100,15 +101,14 @@ function useLowPerformanceMode() {
 function cameraPreset(isDesktop: boolean) {
   return isDesktop
     ? {
-        // Tighter zoom to make floating island the centerpiece
-        position: new THREE.Vector3(0, 5.3, 6.3),
-        lookAt: new THREE.Vector3(0, 0.45, -0.16),
-        fov: 42
+        position: new THREE.Vector3(0.28, 6.9, 11.3),
+        lookAt: new THREE.Vector3(0, 0.3, -0.72),
+        fov: 41
       }
     : {
-        position: new THREE.Vector3(0, 7.05, 9.35),
-        lookAt: new THREE.Vector3(0, 0.58, -0.06),
-        fov: 53
+        position: new THREE.Vector3(0, 6.8, 10.5),
+        lookAt: new THREE.Vector3(0, 0.34, -0.48),
+        fov: 47
       };
 }
 
@@ -177,8 +177,12 @@ function SceneContent({
     const character = characterRef.current;
 
     if (worldRef.current && !isTransitioning) {
-      const targetScale = sceneRefs.current.isDesktop ? 1.02 : 0.84;
+      const targetScale = sceneRefs.current.isDesktop ? 1 : 0.88;
+      const targetY = sceneRefs.current.isDesktop ? -0.14 : 0.08;
+      const targetZ = sceneRefs.current.isDesktop ? 0.18 : 0;
       worldRef.current.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.06);
+      worldRef.current.position.y += (targetY - worldRef.current.position.y) * 0.06;
+      worldRef.current.position.z += (targetZ - worldRef.current.position.z) * 0.06;
       if (!lowPerformance) {
         worldRef.current.rotation.y = pointer.x * 0.055;
         worldRef.current.rotation.x = -pointer.y * 0.018;
@@ -265,18 +269,26 @@ function SceneContent({
 
   return (
     <>
-      {/* Blue-purple dreamy world */}
-      <color attach="background" args={["#0a0a24"]} />
-      <fog attach="fog" args={["#1a1440", 8, 22]} />
-      <ambientLight intensity={0.55} color="#9090d8" />
-      <hemisphereLight args={["#6b6bc8", "#2a1e55", 0.9]} />
-      <directionalLight position={[4.6, 7.2, 5]} intensity={1.15} color="#c8c8ff" />
-      <pointLight position={[0, 2.4, 0]} color="#8888ee" intensity={1.8} distance={9} />
-      <pointLight position={[0, 1.5, -2.9]} color="#a855f7" intensity={0.85} distance={7} />
-      <pointLight position={[-3, 2.0, 3]} color="#6366f1" intensity={0.55} distance={8} />
-      <pointLight position={[3, 1.8, 2.5]} color="#38bdf8" intensity={0.45} distance={7} />
+      <fog attach="fog" args={["#141036", 10, 26]} />
+      <ambientLight intensity={0.62} color="#9b9bea" />
+      <hemisphereLight args={["#7779dd", "#251a51", 1.05]} />
+      <directionalLight position={[4.6, 7.2, 5]} intensity={1.25} color="#d8dcff" />
+      <pointLight position={[0, 2.4, 0]} color="#8b9bff" intensity={2.15} distance={10} />
+      <pointLight position={[0, 1.5, -2.9]} color="#a855f7" intensity={1.05} distance={8} />
+      <pointLight position={[-3, 2.0, 3]} color="#6366f1" intensity={0.72} distance={9} />
+      <pointLight position={[3, 1.8, 2.5]} color="#38bdf8" intensity={0.68} distance={8} />
 
-      <group ref={worldRef}>
+      <Sparkles
+        count={lowPerformance ? 36 : 110}
+        scale={[13, 7, 11]}
+        position={[0, 2.1, -3.4]}
+        size={lowPerformance ? 0.7 : 1.2}
+        speed={lowPerformance ? 0 : 0.18}
+        opacity={0.44}
+        color="#c4b5fd"
+      />
+
+      <group ref={worldRef} position={[0, -0.08, 0.1]}>
         <FloatingIsland />
         <mesh position={[0, 0.5, 0]} rotation={[-Math.PI / 2, 0, 0]} onPointerDown={handleGroundPointerDown}>
           <circleGeometry args={[3.92, 96]} />
@@ -446,7 +458,8 @@ export const AiWorldCanvas = forwardRef<AiWorldCanvasHandle, AiWorldCanvasProps>
           frameloop={inView ? "always" : "never"}
           dpr={[1, lowPerformance ? 1.25 : 1.8]}
           camera={{ position: cameraPreset(isDesktop).position, fov: cameraPreset(isDesktop).fov, near: 0.1, far: 42 }}
-          gl={{ antialias: !lowPerformance, alpha: false, powerPreference: "high-performance" }}
+          gl={{ antialias: !lowPerformance, alpha: true, powerPreference: "high-performance" }}
+          onCreated={({ gl }) => gl.setClearColor(new THREE.Color("#07071a"), 0)}
         >
           <Suspense fallback={null}>
             <SceneContent {...props} lowPerformance={lowPerformance} sceneRefs={sceneRefs} />
