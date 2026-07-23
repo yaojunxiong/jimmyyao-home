@@ -100,9 +100,10 @@ function useLowPerformanceMode() {
 function cameraPreset(isDesktop: boolean) {
   return isDesktop
     ? {
-        position: new THREE.Vector3(0, 5.65, 7.25),
-        lookAt: new THREE.Vector3(0, 0.72, -0.18),
-        fov: 40
+        // Tighter zoom to make floating island the centerpiece
+        position: new THREE.Vector3(0, 5.3, 6.3),
+        lookAt: new THREE.Vector3(0, 0.45, -0.16),
+        fov: 42
       }
     : {
         position: new THREE.Vector3(0, 7.05, 9.35),
@@ -264,13 +265,16 @@ function SceneContent({
 
   return (
     <>
-      <color attach="background" args={["#7bd3ff"]} />
-      <fog attach="fog" args={["#d9f6ff", 10, 21]} />
-      <ambientLight intensity={1.05} color="#fff8e6" />
-      <hemisphereLight args={["#e3f9ff", "#8bd675", 1.45]} />
-      <directionalLight position={[4.6, 7.2, 5]} intensity={1.95} color="#fff1c7" />
-      <pointLight position={[0, 2.4, 0]} color="#ffe7a3" intensity={1.75} distance={8} />
-      <pointLight position={[0, 1.5, -2.9]} color="#fbbf24" intensity={0.65} distance={6} />
+      {/* Blue-purple dreamy world */}
+      <color attach="background" args={["#0a0a24"]} />
+      <fog attach="fog" args={["#1a1440", 8, 22]} />
+      <ambientLight intensity={0.55} color="#9090d8" />
+      <hemisphereLight args={["#6b6bc8", "#2a1e55", 0.9]} />
+      <directionalLight position={[4.6, 7.2, 5]} intensity={1.15} color="#c8c8ff" />
+      <pointLight position={[0, 2.4, 0]} color="#8888ee" intensity={1.8} distance={9} />
+      <pointLight position={[0, 1.5, -2.9]} color="#a855f7" intensity={0.85} distance={7} />
+      <pointLight position={[-3, 2.0, 3]} color="#6366f1" intensity={0.55} distance={8} />
+      <pointLight position={[3, 1.8, 2.5]} color="#38bdf8" intensity={0.45} distance={7} />
 
       <group ref={worldRef}>
         <FloatingIsland />
@@ -436,7 +440,7 @@ export const AiWorldCanvas = forwardRef<AiWorldCanvasHandle, AiWorldCanvasProps>
   }
 
   return (
-    <div ref={stageRef} className={styles.canvasStage} aria-hidden="true">
+    <div ref={stageRef} className={styles.canvasContainer} aria-hidden="true">
       {webglSupported && (
         <Canvas
           frameloop={inView ? "always" : "never"}
